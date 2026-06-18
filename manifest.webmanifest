@@ -1,0 +1,14 @@
+{
+  "name": "Camino · Espanhol para missionários",
+  "short_name": "Camino",
+  "description": "Trilha de espanhol estilo Duolingo para missionários iniciantes: viagem, conversa e evangelização.",
+  "lang": "pt-BR",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#EEF1F6",
+  "theme_color": "#E73B4C",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

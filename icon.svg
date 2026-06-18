@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="112" fill="#E73B4C"/>
+  <!-- auréola -->
+  <ellipse cx="256" cy="118" rx="104" ry="30" fill="none" stroke="#FFCF8C" stroke-width="16"/>
+  <!-- pomba Paloma -->
+  <ellipse cx="266" cy="312" rx="150" ry="128" fill="#FFFFFF"/>
+  <path d="M198 268 q92 42 176 0 l-10 42 q-78 32 -156 0 Z" fill="#F96877"/>
+  <circle cx="296" cy="190" r="92" fill="#FFFFFF"/>
+  <path d="M384 190 L452 206 L384 226 Z" fill="#E8A13C"/>
+  <circle cx="326" cy="176" r="17" fill="#20293B"/>
+  <circle cx="332" cy="170" r="5" fill="#fff"/>
+</svg>
