@@ -1,0 +1,12 @@
+{
+  "name": "camino",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Camino — web app de espanhol para missionários (mobile-first, estilo Duolingo).",
+  "scripts": {
+    "check": "node --check assets/data.js && node --check assets/app.js",
+    "validate": "node scripts/validate.mjs",
+    "test": "npm run check && npm run validate"
+  },
+  "license": "MIT"
+}

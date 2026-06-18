@@ -52,3 +52,15 @@ icon.svg                ícone (Paloma)
 
 Para adicionar conteúdo, edite `assets/data.js` — cada nó da trilha é uma lição
 com sua lista de exercícios (`mcq`, `bank`, `listen`).
+
+## Qualidade & deploy
+
+- **CI** (`.github/workflows/ci.yml`) — a cada push/PR, checa a sintaxe dos JS
+  (`npm run check`) e valida a integridade do currículo (`npm run validate`):
+  todo MCQ tem `correct` válido, toda solução de banco existe no pool, ícones e
+  ids conferem. Rode localmente com `npm test`.
+- **GitHub Pages** (`.github/workflows/deploy.yml`) — publica o site estático a
+  cada push na `main`.
+
+> Para o deploy funcionar, habilite o Pages uma vez em
+> **Settings → Pages → Build and deployment → Source: GitHub Actions**.
