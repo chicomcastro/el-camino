@@ -24,8 +24,9 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
 - **Lição** — exercícios funcionais: múltipla escolha com áudio, "monte a frase"
   (banco de palavras) e ditado ("toque no que você ouve"), com barra de progresso,
   feedback de acerto/erro e voz em espanhol (Web Speech API).
-- **Desafio do dia** — uma revisão rápida diária (exercícios sorteados do que já
-  foi aprendido, estáveis durante o dia) que dá bônus de XP e gemas.
+- **Desafio do dia** — uma revisão rápida diária que **prioriza os itens vencidos
+  da revisão espaçada (SRS)** e completa com exercícios sorteados do que já foi
+  aprendido (estáveis durante o dia); dá bônus de XP e gemas.
 - **Conclusão** — celebração com confete, XP ganho, gemas e precisão.
 - **Sem vidas** — tela de recuperação: gaste **gemas** para repor as vidas (ou
   espere a regeneração com o tempo).
