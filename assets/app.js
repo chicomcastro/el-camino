@@ -111,10 +111,6 @@
       '<path d="M75 37 L88 40 L75 44 Z" fill="#E8A13C"></path>' + eye + '</svg>';
   }
 
-  function statusbar() {
-    return '<div class="statusbar safe-top"><span class="clock">9:41</span><div class="notch"></div>' +
-      '<span></span></div>';
-  }
 
   function heartsColor(h) { return h <= 1 ? '#E73B4C' : (h <= 2 ? '#E8A13C' : '#E73B4C'); }
 
@@ -419,7 +415,7 @@
       case 'profile':  body = viewProfile(); break;
       default:         body = viewHome();
     }
-    root.innerHTML = statusbar() + '<div class="screen">' + body + '</div>' +
+    root.innerHTML = '<div class="screen" data-screen="' + S.screen + '">' + body + '</div>' +
       '<div class="toast" id="toast"></div>';
   }
 
