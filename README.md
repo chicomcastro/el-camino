@@ -30,9 +30,10 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
 - **Sem vidas** — tela de recuperação: gaste **gemas** para repor as vidas (ou
   espere a regeneração com o tempo).
 - **Perfil** — estatísticas, progresso por tema e grade de conquistas.
-- **Gamificação** — XP, meta diária com anel de progresso, ofensiva (streak),
-  **gemas** (moeda para repor vidas), vidas (regeneram com o tempo) e conquistas
-  (por nível, lições, ofensiva e XP).
+- **Gamificação** — XP, meta diária (escolhível: 20/50/100/150 XP) com anel de
+  progresso e comemoração ao bater a meta, **ofensiva** que avança a cada dia em
+  que a meta diária é atingida, **gemas** (moeda para repor vidas), vidas
+  (regeneram com o tempo) e conquistas (por nível, lições, ofensiva e XP).
 - **Sons de feedback** — efeitos sonoros sintetizados (WebAudio, sem arquivos)
   para acerto, erro, conclusão e subida de nível; com botão de mudo no perfil.
 - **Revisão espaçada (SRS)** — cada exercício respondido entra num sistema de

@@ -336,6 +336,10 @@ a { touch-action: manipulation; }
 .complete { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; overflow: hidden; }
 .confetti { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
 .confetti > i { position: absolute; top: 0; border-radius: 2px; animation: camFall linear infinite; }
+
+/* confete leve da comemoração de meta diária (overlay temporário) */
+.celebrate { position: absolute; inset: 0; pointer-events: none; z-index: 60; overflow: hidden; }
+.celebrate > i { position: absolute; top: -16px; border-radius: 2px; animation: camFall linear forwards; }
 .complete .center {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
   padding: 30px 28px; position: relative; z-index: 1;
@@ -382,6 +386,21 @@ a { touch-action: manipulation; }
 .section-ttl { font-size: 15px; font-weight: 700; color: var(--c-ink); margin-bottom: 14px; }
 
 /* linhas de preferências (perfil) */
+/* seletor de meta diária (perfil) */
+.goal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 4px; }
+.goal-opt {
+  position: relative; display: flex; flex-direction: column; align-items: flex-start;
+  background: #fff; border: 2px solid var(--c-line-2); border-bottom-width: 4px; border-radius: 14px;
+  padding: 11px 13px; cursor: pointer; transition: transform 0.08s, border-color 0.12s, background 0.12s;
+}
+.goal-opt:active { transform: translateY(2px); }
+.goal-opt.sel { border-color: var(--c-red); background: #FFF5F6; }
+.goal-opt .go-xp { font-size: 16px; font-weight: 800; color: var(--c-amber-tx); }
+.goal-opt.sel .go-xp { color: var(--c-red); }
+.goal-opt .go-label { font-size: 13px; font-weight: 700; color: var(--c-ink); margin-top: 2px; }
+.goal-opt .go-mins { font-size: 11.5px; font-weight: 600; color: var(--c-muted); margin-top: 1px; }
+.goal-opt .go-check { position: absolute; top: 9px; right: 9px; }
+
 .pref-row {
   display: flex; align-items: center; gap: 12px; width: 100%; text-align: left;
   background: #fff; border: 1px solid var(--c-line-2); border-radius: 14px;
