@@ -14,13 +14,37 @@
   var HEARTS_REGEN_MS = 20 * 60 * 1000; // 1 vida a cada 20 min
 
   // ---- trilha achatada: sequência contínua de lições ----
+  // Cada item conhece seu nível e módulo, para agrupar a UI por nível.
   var TRAIL = [];
-  DATA.units.forEach(function (u, ui) {
-    u.lessons.forEach(function (l, li) {
-      TRAIL.push({ unit: u, lesson: l, unitIdx: ui, lessonIdx: li, globalIdx: TRAIL.length });
+  DATA.levels.forEach(function (lv, levelIdx) {
+    var levelStart = TRAIL.length;
+    lv.modules.forEach(function (mod, moduleIdx) {
+      mod.lessons.forEach(function (l, lessonIdx) {
+        TRAIL.push({
+          level: lv, levelIdx: levelIdx, levelStart: levelStart,
+          module: mod, moduleIdx: moduleIdx,
+          lesson: l, lessonIdx: lessonIdx, globalIdx: TRAIL.length,
+        });
+      });
     });
   });
   var TOTAL_LESSONS = TRAIL.length;
+
+  // Faixa [início, fim) de lições de cada nível e seu tamanho.
+  var LEVEL_BOUNDS = DATA.levels.map(function (lv, i) {
+    var idxs = TRAIL.filter(function (t) { return t.levelIdx === i; });
+    var start = idxs.length ? idxs[0].globalIdx : TRAIL.length;
+    return { id: lv.id, start: start, end: start + idxs.length, size: idxs.length };
+  });
+  // Um nível está concluído quando o progresso passou de seu fim.
+  function levelDone(i) { return S.progress >= LEVEL_BOUNDS[i].end; }
+  // Índice do nível "atual" (onde está a próxima lição).
+  function currentLevelIdx() {
+    for (var i = 0; i < LEVEL_BOUNDS.length; i++) {
+      if (S.progress < LEVEL_BOUNDS[i].end) return i;
+    }
+    return LEVEL_BOUNDS.length - 1;
+  }
 
   // ===========================================================
   //  Persistência
@@ -79,6 +103,8 @@
   S.screen = S.onboarded ? 'home' : 'onboarding';
   S.obStep = 0;       // passo do onboarding
   S.obGoal = S.dailyGoalXp; // seleção temporária de meta no onboarding
+  S.homeLevel = null; // nível em foco na home (null = nível atual)
+  S.levelUpIdx = 0;   // nível recém-concluído (tela de level-up)
   S.cur = null;       // índice global da lição em curso
   S.exIndex = 0;
   S.selected = null;
@@ -131,9 +157,19 @@
 
   function heartsColor(h) { return h <= 1 ? '#E73B4C' : (h <= 2 ? '#E8A13C' : '#E73B4C'); }
 
+  // Uma conquista foi conquistada?
+  function achEarned(a) {
+    if (a.kind === 'lessons') return S.progress >= a.n;
+    if (a.kind === 'streak') return S.streak >= a.n;
+    if (a.kind === 'level') {
+      var i = DATA.levels.findIndex(function (lv) { return lv.id === a.n; });
+      return i >= 0 && levelDone(i);
+    }
+    return false;
+  }
   // nº de conquistas desbloqueadas
   function medalsCount() {
-    return DATA.achievements.filter(function (a) { return S.progress >= a.need; }).length;
+    return DATA.achievements.filter(achEarned).length;
   }
 
   // ===========================================================
@@ -189,47 +225,72 @@
     return html;
   }
 
-  function viewHome() {
-    var pattern = [0, 46, 66, 46, 0, -46, -66, -46];
-    var html = '';
-
-    // topbar
-    html += '<div class="topbar">' +
+  function topbar() {
+    return '<div class="topbar">' +
       '<div class="row" style="gap:7px;flex:1;"><div class="flag"></div><span class="lang">Espanhol</span></div>' +
       '<div class="pill streak">' + svg(IC.flame, 16, '#E8730C') + '<span>' + S.streak + '</span></div>' +
       '<div class="pill xp">' + svg(IC.star, 16, '#E8A13C') + '<span>' + fmt(S.totalXp) + '</span></div>' +
       '<div class="pill medals">' + svg(IC.heart, 16, '#E73B4C') + '<span>' + S.hearts + '</span></div>' +
       '</div>';
+  }
 
+  function viewHome() {
+    var pattern = [0, 46, 66, 46, 0, -46, -66, -46];
+    var maxLevel = currentLevelIdx();
+    var li = (S.homeLevel != null && S.homeLevel >= 0 && S.homeLevel <= maxLevel) ? S.homeLevel : maxLevel;
+    var lv = DATA.levels[li];
+    var b = LEVEL_BOUNDS[li];
+    var doneInLevel = Math.max(0, Math.min(b.size, S.progress - b.start));
+
+    var html = topbar();
     html += '<div class="scroll" style="padding:16px 18px 28px;">';
 
-    // saudação
-    html += '<div class="greet"><div class="mascot">' + mascot(56, 'happy') + '</div>' +
-      '<div style="flex:1;"><div class="t1">¡Hola, ' + esc(S.name) + '!</div>' +
-      '<div class="t2">Pronto para a missão de hoje?</div></div></div>';
+    // saudação (só no nível atual)
+    if (li === maxLevel) {
+      html += '<div class="greet"><div class="mascot">' + mascot(56, 'happy') + '</div>' +
+        '<div style="flex:1;"><div class="t1">¡Hola, ' + esc(S.name) + '!</div>' +
+        '<div class="t2">Pronto para a missão de hoje?</div></div></div>';
+    }
 
-    // unidades + nós
-    DATA.units.forEach(function (u, ui) {
+    // banner do nível (com navegação entre níveis desbloqueados)
+    var pct = b.size ? Math.round((doneInLevel / b.size) * 100) : 0;
+    html += '<div class="level-banner" style="background:linear-gradient(135deg,' + lv.accent + ',' + lv.accentDk + ');">' +
+      '<div class="lb-top">' +
+      '<button class="lb-nav" ' + (li > 0 ? 'data-act="levelPrev"' : 'disabled') + '>' +
+      svg('M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z', 22, '#fff') + '</button>' +
+      '<div class="lb-mid"><div class="lb-step">NÍVEL ' + (li + 1) + ' DE ' + DATA.levels.length + ' · ' + esc(lv.short) + '</div>' +
+      '<div class="lb-name">' + esc(lv.name) + '</div></div>' +
+      '<button class="lb-nav" ' + (li < maxLevel ? 'data-act="levelNext"' : 'disabled') + '>' +
+      svg('M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z', 22, '#fff') + '</button>' +
+      '</div>' +
+      '<div class="lb-tag">' + esc(lv.tagline) + '</div>' +
+      '<div class="lb-bar"><i style="width:' + pct + '%;"></i></div>' +
+      '<div class="lb-foot"><span>' + doneInLevel + '/' + b.size + ' lições</span>' +
+      '<button class="lb-all" data-act="goLevels">ver níveis ›</button></div>' +
+      '</div>';
+
+    // módulos do nível + nós
+    lv.modules.forEach(function (mod) {
       html += '<div class="unit">';
-      html += '<div class="unit-banner" style="background:' + u.color + ';box-shadow:0 4px 0 ' + u.shadow + ';">' +
-        '<div style="flex:1;"><div class="label">UNIDADE ' + u.num + '</div>' +
-        '<div class="title">' + esc(u.title) + '</div><div class="sub">' + esc(u.sub) + '</div></div>' +
-        '<div class="ico">' + svg(IC.book, 22, '#fff') + '</div></div>';
+      html += '<div class="unit-banner" style="background:' + mod.color + ';box-shadow:0 4px 0 ' + mod.shadow + ';">' +
+        '<div style="flex:1;"><div class="label">MÓDULO · ' + esc(mod.theme) + '</div>' +
+        '<div class="title">' + esc(mod.title) + '</div></div>' +
+        '<div class="ico">' + svg(IC[mod.icon], 22, '#fff') + '</div></div>';
 
       html += '<div class="nodes">';
-      u.lessons.forEach(function (l, li) {
-        var gi = TRAIL.findIndex(function (t) { return t.unitIdx === ui && t.lessonIdx === li; });
+      mod.lessons.forEach(function (l) {
+        var gi = TRAIL.findIndex(function (t) { return t.lesson.id === l.id; });
         var isDone = gi < S.progress, isCurrent = gi === S.progress, locked = gi > S.progress;
-        var color = locked ? 'var(--c-locked)' : u.color;
-        var shadow = locked ? 'var(--c-locked-dk)' : u.shadow;
+        var color = locked ? 'var(--c-locked)' : mod.color;
+        var shadow = locked ? 'var(--c-locked-dk)' : mod.shadow;
         var iconPath = locked ? IC.lock : IC[l.icon];
         var iconColor = locked ? '#9CA5B8' : '#fff';
-        var off = pattern[gi % 8];
+        var off = pattern[(gi - b.start) % 8];
 
         html += '<div class="node-wrap" style="transform:translateX(' + off + 'px);">';
         if (isCurrent) {
-          html += '<div class="node-start-tip" style="border-color:' + u.color + ';color:' + u.color + ';">COMEÇAR' +
-            '<span class="arrow" style="border-top-color:' + u.color + ';"></span></div>';
+          html += '<div class="node-start-tip" style="border-color:' + mod.color + ';color:' + mod.color + ';">COMEÇAR' +
+            '<span class="arrow" style="border-top-color:' + mod.color + ';"></span></div>';
         }
         html += '<button class="node" ' + (isCurrent ? 'data-act="start" data-gi="' + gi + '"' : 'disabled') +
           ' style="background:' + color + ';box-shadow:0 6px 0 ' + shadow + ';">' +
@@ -244,6 +305,68 @@
 
     html += '</div>'; // scroll
     html += bottomnav('home');
+    return html;
+  }
+
+  // ---- Visão geral dos níveis (a jornada inteira) ----
+  function viewLevels() {
+    var maxLevel = currentLevelIdx();
+    var html = '<div class="lesson-head" style="justify-content:flex-start;gap:12px;">' +
+      '<button class="iconbtn" data-act="goHome">' +
+      svg('M15.41,16.58L10.83,12L15.41,7.41L14,6L8,12L14,18L15.41,16.58Z', 24, '#9CA5B8') + '</button>' +
+      '<span style="font-size:17px;font-weight:800;color:#20293B;">Sua jornada</span></div>';
+
+    html += '<div class="scroll" style="padding:6px 18px 28px;">';
+    DATA.levels.forEach(function (lv, i) {
+      var b = LEVEL_BOUNDS[i];
+      var done = Math.max(0, Math.min(b.size, S.progress - b.start));
+      var locked = i > maxLevel;
+      var isCur = i === maxLevel;
+      var pct = b.size ? Math.round((done / b.size) * 100) : 0;
+      var bg = locked ? '#F4F6FB' : '#fff';
+      var ring = locked ? '#E3E8F1' : lv.accent;
+      var statusIco = levelDone(i)
+        ? svg(IC.checkC, 22, lv.accent)
+        : (locked ? svg(IC.lock, 20, '#B6BECE') : svg(IC.flame, 20, lv.accent));
+      html += '<button class="level-card" ' + (locked ? 'disabled' : 'data-act="openLevel" data-li="' + i + '"') +
+        ' style="background:' + bg + ';border-color:' + (isCur ? lv.accent : '#E9EDF4') + ';">' +
+        '<div class="lc-badge" style="background:' + (locked ? '#EEF1F6' : lv.accent) + ';color:' + (locked ? '#9CA5B8' : '#fff') + ';">' + esc(lv.short) + '</div>' +
+        '<div class="lc-mid"><div class="lc-name" style="color:' + (locked ? '#9CA5B8' : '#20293B') + ';">' + esc(lv.name) + '</div>' +
+        '<div class="lc-tag">' + esc(lv.tagline) + '</div>' +
+        '<div class="lc-bar"><i style="width:' + pct + '%;background:' + ring + ';"></i></div></div>' +
+        '<div class="lc-status">' + statusIco + '</div>' +
+        '</button>';
+    });
+    html += '</div>' + bottomnav('home');
+    return html;
+  }
+
+  // ---- Comemoração de subida de nível ----
+  function viewLevelUp() {
+    var lv = DATA.levels[S.levelUpIdx] || DATA.levels[0];
+    var next = DATA.levels[S.levelUpIdx + 1];
+    var html = '<div class="complete"><div class="confetti">';
+    var palette = ['#E73B4C', '#3C76E8', '#9D55FF', '#1AC136', '#E8A13C'];
+    for (var i = 0; i < 26; i++) {
+      var left = Math.round((i * 53 + 7) % 100);
+      var size = 8 + (i % 3) * 3;
+      var dur = (2.2 + (i % 4) * 0.4).toFixed(1);
+      var delay = ((i % 6) * 0.3).toFixed(2);
+      html += '<i style="left:' + left + '%;width:' + size + 'px;height:' + size + 'px;background:' +
+        palette[i % palette.length] + ';animation-duration:' + dur + 's;animation-delay:' + delay + 's;"></i>';
+    }
+    html += '</div><div class="center">' +
+      '<div class="pop levelup-badge" style="background:linear-gradient(135deg,' + lv.accent + ',' + lv.accentDk + ');">' +
+      svg(IC.trophy, 64, '#fff') + '</div>' +
+      '<div class="lu-kicker" style="color:' + lv.accent + ';">NÍVEL CONCLUÍDO</div>' +
+      '<h1>' + esc(lv.name) + ' ✓</h1>' +
+      '<div class="sub">' + (next
+        ? 'Você desbloqueou o nível <b>' + esc(next.name) + '</b>. ¡Vamos en serio!'
+        : 'Você concluiu toda a trilha do Camino. ¡Felicidades, ' + esc(S.name) + '!') + '</div>' +
+      '</div>' +
+      '<div class="verify-wrap" style="position:relative;z-index:1;">' +
+      '<button class="btn-3d" data-act="finishLevelUp" style="background:' + lv.accent + ';box-shadow:0 4px 0 ' + lv.accentDk + ';">' +
+      (next ? 'CONTINUAR' : 'CONCLUIR') + '</button></div></div>';
     return html;
   }
 
@@ -425,10 +548,12 @@
     var name = (S.name || 'Lucas').trim();
     var initials = (name.split(/\s+/).map(function (w) { return w[0]; }).join('').slice(0, 2) || 'L').toUpperCase();
 
+    var curLv = DATA.levels[currentLevelIdx()];
+
     var html = '<div class="scroll">';
     html += '<div class="profile-head"><div class="avatar" data-act="rename">' + initials + '</div>' +
       '<div><div class="pname" data-act="rename">' + esc(name) + '</div>' +
-      '<div class="prole">Missionário em formação · nível básico</div></div></div>';
+      '<div class="prole">Missionário em formação · nível ' + esc(curLv.name) + '</div></div></div>';
 
     html += '<div class="stats">' +
       '<div class="stat" style="background:#FFF4E5;"><div class="n" style="color:#8E570B;">' + fmt(S.totalXp) + '</div><div class="l" style="color:#C27B17;">XP total</div></div>' +
@@ -436,22 +561,28 @@
       '<div class="stat" style="background:#FFE6E9;"><div class="n" style="color:#8D0A17;">' + medalsCount() + '</div><div class="l" style="color:#C71C2D;">Medalhas</div></div>' +
       '</div>';
 
-    // progresso por tema (calculado a partir das lições concluídas)
+    // progresso por tema (agrega todas as lições de cada tema na trilha)
     html += '<div style="padding:6px 22px 4px;"><div class="section-ttl">Progresso por tema</div>';
-    DATA.units.forEach(function (u, ui) {
-      var total = u.lessons.length;
-      var done = TRAIL.filter(function (t) { return t.unitIdx === ui && t.globalIdx < S.progress; }).length;
-      var pct = Math.round((done / total) * 100);
-      html += '<div class="themebar"><div class="head"><span class="lbl">' + esc(u.theme) + '</span>' +
-        '<span class="pct" style="color:' + u.color + ';">' + pct + '%</span></div>' +
-        '<div class="track"><i style="width:' + pct + '%;background:' + u.color + ';"></i></div></div>';
+    var THEMES = [
+      { theme: 'Viagem', color: '#3C76E8' },
+      { theme: 'Conversa', color: '#9D55FF' },
+      { theme: 'Evangelização', color: '#E73B4C' },
+    ];
+    THEMES.forEach(function (th) {
+      var inTheme = TRAIL.filter(function (t) { return t.module.theme === th.theme; });
+      var total = inTheme.length;
+      var done = inTheme.filter(function (t) { return t.globalIdx < S.progress; }).length;
+      var pct = total ? Math.round((done / total) * 100) : 0;
+      html += '<div class="themebar"><div class="head"><span class="lbl">' + esc(th.theme) + '</span>' +
+        '<span class="pct" style="color:' + th.color + ';">' + pct + '%</span></div>' +
+        '<div class="track"><i style="width:' + pct + '%;background:' + th.color + ';"></i></div></div>';
     });
     html += '</div>';
 
     // conquistas
     html += '<div style="padding:14px 22px 20px;"><div class="section-ttl">Conquistas</div><div class="ach-grid">';
     DATA.achievements.forEach(function (a) {
-      var earned = S.progress >= a.need;
+      var earned = achEarned(a);
       var bg = earned ? a.bg : '#F0F3FA';
       var ring = earned ? a.c : '#E3E8F1';
       var iconColor = earned ? a.c : '#B6BECE';
@@ -495,6 +626,8 @@
       case 'onboarding': body = viewOnboarding(); break;
       case 'lesson':   body = viewLesson(); break;
       case 'complete': body = viewComplete(); break;
+      case 'levelup':  body = viewLevelUp(); break;
+      case 'levels':   body = viewLevels(); break;
       case 'lives':    body = viewLives(); break;
       case 'profile':  body = viewProfile(); break;
       default:         body = viewHome();
@@ -592,13 +725,21 @@
     S.lastActive = today;
   }
   function finishLesson() {
+    var completedLevel = -1;
     // conclui a lição em curso, se ainda não estava concluída
-    if (S.cur === S.progress) S.progress = Math.min(TOTAL_LESSONS, S.progress + 1);
+    if (S.cur === S.progress) {
+      var node = TRAIL[S.cur];
+      S.progress = Math.min(TOTAL_LESSONS, S.progress + 1);
+      // a lição era a última do nível? então subimos de nível
+      if (node && S.progress >= LEVEL_BOUNDS[node.levelIdx].end) completedLevel = node.levelIdx;
+    }
     S.totalXp += S.gainedXp;
     bumpStreak();
-    set({ screen: 'home' });
-    if (S.progress >= TOTAL_LESSONS) {
-      setTimeout(function () { toast(svg(IC.trophy, 16, '#FFD479') + 'Trilha concluída! ¡Bien hecho!'); }, 400);
+    S.homeLevel = null; // volta a focar o nível atual
+    if (completedLevel >= 0) {
+      set({ screen: 'levelup', levelUpIdx: completedLevel });
+    } else {
+      set({ screen: 'home' });
     }
   }
 
@@ -632,9 +773,22 @@
         break;
       }
       case 'start': startLesson(parseInt(t.getAttribute('data-gi'), 10)); break;
-      case 'goHome': set({ screen: 'home' }); break;
+      case 'goHome': set({ screen: 'home', homeLevel: null }); break;
       case 'goProfile': set({ screen: 'profile' }); break;
-      case 'close': set({ screen: 'home' }); break;
+      case 'goLevels': set({ screen: 'levels' }); break;
+      case 'openLevel': set({ screen: 'home', homeLevel: parseInt(t.getAttribute('data-li'), 10) }); break;
+      case 'levelPrev': {
+        var curL = (S.homeLevel != null ? S.homeLevel : currentLevelIdx());
+        set({ homeLevel: Math.max(0, curL - 1) });
+        break;
+      }
+      case 'levelNext': {
+        var curN = (S.homeLevel != null ? S.homeLevel : currentLevelIdx());
+        set({ homeLevel: Math.min(currentLevelIdx(), curN + 1) });
+        break;
+      }
+      case 'finishLevelUp': set({ screen: 'home', homeLevel: null }); break;
+      case 'close': set({ screen: 'home', homeLevel: null }); break;
       case 'select':
         if (!S.checked) set({ selected: parseInt(t.getAttribute('data-i'), 10) });
         break;
