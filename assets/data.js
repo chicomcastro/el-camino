@@ -54,7 +54,14 @@ window.CAMINO_DATA = {
       tagline: 'As primeiras palavras e a sobrevivência na viagem.',
       modules: [
         m('ini-m1', 'Primeiros passos', 'viagem', 'star', [
-          { id: 'ini-m1-l1', title: 'Saudações', icon: 'star', exercises: [
+          { id: 'ini-m1-l1', title: 'Saudações', icon: 'star',
+            teach: [
+              { es: 'Hola', pt: 'Olá' },
+              { es: '¡Buenos días!', pt: 'Bom dia!' },
+              { es: 'Gracias', pt: 'Obrigado' },
+              { es: 'Por favor', pt: 'Por favor' },
+            ],
+            exercises: [
             { type: 'mcq', prompt: 'Toque na tradução correta', audioEs: '¡Buenos días!',
               options: ['Bom dia', 'Boa noite', 'Até logo', 'Por favor'], correct: 0 },
             { type: 'mcq', prompt: 'O que significa em português?', bubblePt: 'Gracias',
@@ -107,7 +114,14 @@ window.CAMINO_DATA = {
       tagline: 'Apresentar-se, puxar conversa e se virar na cidade.',
       modules: [
         m('bas-m1', 'Conhecer pessoas', 'conversa', 'account', [
-          { id: 'bas-m1-l1', title: 'Apresentar-se', icon: 'account', exercises: [
+          { id: 'bas-m1-l1', title: 'Apresentar-se', icon: 'account',
+            teach: [
+              { es: '¿Cómo te llamas?', pt: 'Como você se chama?' },
+              { es: 'Me llamo…', pt: 'Meu nome é…' },
+              { es: 'Mucho gusto', pt: 'Muito prazer' },
+              { es: 'Soy de Brasil', pt: 'Sou do Brasil' },
+            ],
+            exercises: [
             { type: 'listen', prompt: 'Toque no que você ouve', audioEs: '¿Cómo te llamas?', dictation: true,
               words: ['¿Cómo', 'te', 'llamas?', 'dónde', 'vives'], solution: ['¿Cómo', 'te', 'llamas?'] },
             { type: 'mcq', prompt: 'O que significa?', bubblePt: 'Mucho gusto',
@@ -160,7 +174,14 @@ window.CAMINO_DATA = {
       tagline: 'Compartilhar a fé e falar um pouco sobre você.',
       modules: [
         m('int1-m1', 'Compartilhar a fé', 'evangelizacao', 'heart', [
-          { id: 'int1-m1-l1', title: 'A mensagem', icon: 'heart', exercises: [
+          { id: 'int1-m1-l1', title: 'A mensagem', icon: 'heart',
+            teach: [
+              { es: 'Dios', pt: 'Deus' },
+              { es: 'el amor', pt: 'o amor' },
+              { es: 'la fe', pt: 'a fé' },
+              { es: 'Dios te ama', pt: 'Deus te ama' },
+            ],
+            exercises: [
             { type: 'bank', prompt: 'Monte a frase em espanhol', bubblePt: 'Deus te ama',
               words: ['Dios', 'te', 'ama', 'casa', 'gracias'], solution: ['Dios', 'te', 'ama'] },
             { type: 'mcq', prompt: 'O que significa "la fe"?',
