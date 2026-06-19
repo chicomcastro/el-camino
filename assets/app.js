@@ -12,6 +12,7 @@
 
   var HEARTS_MAX = 5;
   var HEARTS_REGEN_MS = 20 * 60 * 1000; // 1 vida a cada 20 min
+  var REVIVE_COST = 50;                 // gemas para recuperar todas as vidas
 
   // ---- trilha achatada: sequência contínua de lições ----
   // Cada item conhece seu nível e módulo, para agrupar a UI por nível.
@@ -56,6 +57,10 @@
       dailyGoalXp: 50,      // meta diária de XP
       progress: 0,          // nº de lições concluídas (índice da lição atual)
       totalXp: 0,
+      gems: 0,              // gemas (moeda) p/ recuperar vidas
+      xpToday: 0,           // XP ganho hoje (meta diária)
+      xpTodayDate: null,    // dia de referência do xpToday
+      dailyDoneDate: null,  // dia em que o desafio diário foi concluído
       hearts: HEARTS_MAX,
       heartsTs: Date.now(), // momento da última perda (base p/ regenerar)
       streak: 0,
@@ -76,7 +81,8 @@
   function persist() {
     var p = {
       name: S.name, onboarded: S.onboarded, dailyGoalXp: S.dailyGoalXp,
-      progress: S.progress, totalXp: S.totalXp,
+      progress: S.progress, totalXp: S.totalXp, gems: S.gems,
+      xpToday: S.xpToday, xpTodayDate: S.xpTodayDate, dailyDoneDate: S.dailyDoneDate,
       hearts: S.hearts, heartsTs: S.heartsTs, streak: S.streak, lastActive: S.lastActive,
     };
     try { localStorage.setItem(STORE_KEY, JSON.stringify(p)); } catch (e) {}
@@ -105,7 +111,9 @@
   S.obGoal = S.dailyGoalXp; // seleção temporária de meta no onboarding
   S.homeLevel = null; // nível em foco na home (null = nível atual)
   S.levelUpIdx = 0;   // nível recém-concluído (tela de level-up)
-  S.cur = null;       // índice global da lição em curso
+  S.cur = null;       // índice global da lição em curso (-1 = desafio diário)
+  S.daily = false;    // estamos no desafio diário?
+  S.activeExercises = []; // exercícios da sessão em curso
   S.exIndex = 0;
   S.selected = null;
   S.checked = false;
@@ -114,7 +122,9 @@
   S.bank = [];
   S.answer = [];
   S.gainedXp = 0;
+  S.gainedGems = 0;
   S.shakeKey = 0;
+  ensureDaily();
 
   // Opções de meta diária (XP/dia ≈ minutos).
   var GOALS = [
@@ -137,6 +147,20 @@
   function svg(path, size, color) {
     return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 24 24" fill="' + color + '">' +
       '<path d="' + path + '"></path></svg>';
+  }
+  // Gema (moeda). Path próprio (não está no conjunto de ícones do currículo).
+  var GEM = 'M6,2L2,8L12,22L22,8L18,2H6M9.5,4H14.5L16.5,7H7.5L9.5,4M5.43,7L7,4.5L8.5,7H5.43M11,9H13L12,18.5L11,9M9,9L9.9,17L4.3,9H9M15,9H19.7L14.1,17L15,9Z';
+  function gemIcon(size, color) { return svg(GEM, size, color || '#22B8CF'); }
+
+  // Anel de progresso (SVG) para a meta diária.
+  function ring(pct, color, size) {
+    var r = (size - 8) / 2, c = 2 * Math.PI * r, off = c * (1 - Math.max(0, Math.min(1, pct / 100)));
+    var cx = size / 2;
+    return '<svg width="' + size + '" height="' + size + '" viewBox="0 0 ' + size + ' ' + size + '">' +
+      '<circle cx="' + cx + '" cy="' + cx + '" r="' + r + '" fill="none" stroke="#EEF1F6" stroke-width="6"></circle>' +
+      '<circle cx="' + cx + '" cy="' + cx + '" r="' + r + '" fill="none" stroke="' + color + '" stroke-width="6" ' +
+      'stroke-linecap="round" stroke-dasharray="' + c.toFixed(1) + '" stroke-dashoffset="' + off.toFixed(1) + '" ' +
+      'transform="rotate(-90 ' + cx + ' ' + cx + ')"></circle></svg>';
   }
 
   // Mascote "Paloma" (pomba com auréola). mood: 'happy' | 'sad'
@@ -161,6 +185,7 @@
   function achEarned(a) {
     if (a.kind === 'lessons') return S.progress >= a.n;
     if (a.kind === 'streak') return S.streak >= a.n;
+    if (a.kind === 'xp') return S.totalXp >= a.n;
     if (a.kind === 'level') {
       var i = DATA.levels.findIndex(function (lv) { return lv.id === a.n; });
       return i >= 0 && levelDone(i);
@@ -227,11 +252,46 @@
 
   function topbar() {
     return '<div class="topbar">' +
-      '<div class="row" style="gap:7px;flex:1;"><div class="flag"></div><span class="lang">Espanhol</span></div>' +
-      '<div class="pill streak">' + svg(IC.flame, 16, '#E8730C') + '<span>' + S.streak + '</span></div>' +
-      '<div class="pill xp">' + svg(IC.star, 16, '#E8A13C') + '<span>' + fmt(S.totalXp) + '</span></div>' +
-      '<div class="pill medals">' + svg(IC.heart, 16, '#E73B4C') + '<span>' + S.hearts + '</span></div>' +
+      '<div class="flag" style="margin-right:auto;"></div>' +
+      '<div class="pill streak">' + svg(IC.flame, 15, '#E8730C') + '<span>' + S.streak + '</span></div>' +
+      '<div class="pill gemspill">' + gemIcon(15, '#0F9FB5') + '<span>' + fmt(S.gems) + '</span></div>' +
+      '<div class="pill xp">' + svg(IC.star, 15, '#E8A13C') + '<span>' + fmt(S.totalXp) + '</span></div>' +
+      '<div class="pill medals">' + svg(IC.heart, 15, '#E73B4C') + '<span>' + S.hearts + '</span></div>' +
       '</div>';
+  }
+
+  // Bloco "hoje": anel de meta diária + desafio do dia.
+  function todayCard() {
+    ensureDaily();
+    var goal = S.dailyGoalXp || 50;
+    var pct = Math.min(100, Math.round((S.xpToday / goal) * 100));
+    var met = S.xpToday >= goal;
+    var ringColor = met ? '#1AC136' : '#E8A13C';
+
+    var html = '<div class="today">';
+    html += '<div class="today-ring">' + ring(pct, ringColor, 64) +
+      '<div class="tr-center">' + (met
+        ? svg(IC.checkC, 22, '#1AC136')
+        : '<span class="tr-pct">' + pct + '%</span>') + '</div></div>';
+    html += '<div class="today-mid"><div class="today-t">Meta diária</div>' +
+      '<div class="today-s">' + S.xpToday + ' / ' + goal + ' XP' + (met ? ' · concluída! 🎉' : '') + '</div></div>';
+    html += '</div>';
+
+    // desafio do dia
+    var doneToday = S.dailyDoneDate === todayStr();
+    var locked = S.progress < 1;
+    if (doneToday) {
+      html += '<div class="daily done"><div class="d-ic" style="background:#E7FEEA;">' + svg(IC.checkC, 22, '#1AC136') + '</div>' +
+        '<div class="d-mid"><div class="d-t">Desafio do dia</div><div class="d-s">Concluído! Volte amanhã 🔥</div></div></div>';
+    } else if (locked) {
+      html += '<div class="daily locked"><div class="d-ic" style="background:#EEF1F6;">' + svg(IC.lock, 20, '#9CA5B8') + '</div>' +
+        '<div class="d-mid"><div class="d-t">Desafio do dia</div><div class="d-s">Conclua sua 1ª lição para liberar</div></div></div>';
+    } else {
+      html += '<button class="daily" data-act="startDaily"><div class="d-ic" style="background:#FFF1E0;">' + svg(IC.flame, 22, '#E8730C') + '</div>' +
+        '<div class="d-mid"><div class="d-t">Desafio do dia</div><div class="d-s">Revisão rápida · bônus de XP e 💎</div></div>' +
+        svg('M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z', 22, '#E8A13C') + '</button>';
+    }
+    return html;
   }
 
   function viewHome() {
@@ -245,11 +305,12 @@
     var html = topbar();
     html += '<div class="scroll" style="padding:16px 18px 28px;">';
 
-    // saudação (só no nível atual)
+    // saudação + bloco "hoje" (só no nível atual)
     if (li === maxLevel) {
       html += '<div class="greet"><div class="mascot">' + mascot(56, 'happy') + '</div>' +
         '<div style="flex:1;"><div class="t1">¡Hola, ' + esc(S.name) + '!</div>' +
         '<div class="t2">Pronto para a missão de hoje?</div></div></div>';
+      html += todayCard();
     }
 
     // banner do nível (com navegação entre níveis desbloqueados)
@@ -379,14 +440,9 @@
       '</div>';
   }
 
-  function curEx() {
-    var node = TRAIL[S.cur];
-    return node ? node.lesson.exercises[S.exIndex] : {};
-  }
-  function curLessonLen() {
-    var node = TRAIL[S.cur];
-    return node ? node.lesson.exercises.length : 1;
-  }
+  // O conjunto de exercícios em curso (lição normal ou desafio diário).
+  function curEx() { return (S.activeExercises && S.activeExercises[S.exIndex]) || {}; }
+  function curLessonLen() { return (S.activeExercises && S.activeExercises.length) || 1; }
 
   function viewLesson() {
     var ex = curEx();
@@ -490,8 +546,7 @@
   }
 
   function viewComplete() {
-    var node = TRAIL[S.cur];
-    var len = node ? node.lesson.exercises.length : 1;
+    var len = curLessonLen();
     var accuracy = Math.round((S.correct / len) * 100);
     var palette = ['#E73B4C', '#3C76E8', '#9D55FF', '#1AC136', '#E8A13C'];
 
@@ -506,14 +561,16 @@
     }
     html += '</div>';
 
-    html += '<div class="center"><div class="pop">' + mascot(148, 'happy') + '</div>' +
-      '<h1>¡Lección completada!</h1>' +
+    html += '<div class="center"><div class="pop">' + mascot(132, 'happy') + '</div>' +
+      '<h1>' + (S.daily ? '¡Desafío completado!' : '¡Lección completada!') + '</h1>' +
       '<div class="sub">Você acertou ' + S.correct + ' de ' + len + ' · siga firme na missão!</div>' +
       '<div class="stat-cards">' +
       '<div class="stat-card" style="border-color:#FFE8C9;"><div class="cap" style="background:#E8A13C;">XP GANHO</div>' +
-      '<div class="val" style="color:#8E570B;">' + svg(IC.star, 20, '#E8A13C') + '+' + S.gainedXp + '</div></div>' +
+      '<div class="val" style="color:#8E570B;">' + svg(IC.star, 18, '#E8A13C') + '+' + S.gainedXp + '</div></div>' +
+      '<div class="stat-card" style="border-color:#C9F0F6;"><div class="cap" style="background:#0F9FB5;">GEMAS</div>' +
+      '<div class="val" style="color:#0B6E7E;">' + gemIcon(18, '#0F9FB5') + '+' + S.gainedGems + '</div></div>' +
       '<div class="stat-card" style="border-color:#CCFED5;"><div class="cap" style="background:#1AC136;">PRECISÃO</div>' +
-      '<div class="val" style="color:#0B8C21;">' + svg(IC.checkC, 20, '#1AC136') + accuracy + '%</div></div>' +
+      '<div class="val" style="color:#0B8C21;">' + svg(IC.checkC, 18, '#1AC136') + accuracy + '%</div></div>' +
       '</div></div>';
 
     html += '<div class="verify-wrap" style="position:relative;z-index:1;">' +
@@ -531,14 +588,18 @@
       svg('M12.1,18.55L12,18.65L11.89,18.55C7.14,14.24 4,11.39 4,8.5C4,6.5 5.5,5 7.5,5C9.04,5 10.54,6 11.07,7.36H12.93C13.46,6 14.96,5 16.5,5C18.5,5 20,6.5 20,8.5C20,11.39 16.86,14.24 12.1,18.55M16.5,3C14.76,3 13.09,3.81 12,5.08C10.91,3.81 9.24,3 7.5,3C4.42,3 2,5.41 2,8.5C2,12.27 5.4,15.36 10.55,20.03L12,21.35L13.45,20.03C18.6,15.36 22,12.27 22,8.5C22,5.41 19.58,3 16.5,3M9.1,8L8,9.1L10.9,12L8,14.9L9.1,16L12,13.1L14.9,16L16,14.9L13.1,12L16,9.1L14.9,8L12,10.9L9.1,8Z', 22, '#E73B4C') +
       '</div></div>' +
       '<h1>¡Te quedaste sin vidas!</h1>' +
-      '<div class="sub">Você ficou sem corações nesta lição. Recupere para seguir firme na missão.</div>' +
+      '<div class="sub">Você ficou sem corações. Recupere com gemas ou volte depois — as vidas também se recuperam com o tempo.</div>' +
       '<div class="hearts-row">';
     for (var i = 0; i < HEARTS_MAX; i++) html += svg(IC.heart, 26, '#E9EDF4');
     html += '</div></div>';
 
+    var canAfford = S.gems >= REVIVE_COST;
     html += '<div class="actions">' +
-      '<button class="btn-3d" data-act="revive" style="background:#E73B4C;box-shadow:0 4px 0 #C71C2D;display:flex;align-items:center;justify-content:center;gap:9px;">' +
-      svg(IC.heart, 20, '#fff') + 'RECUPERAR VIDAS</button>' +
+      '<button class="btn-3d" ' + (canAfford ? 'data-act="revive"' : 'disabled') +
+      ' style="background:' + (canAfford ? '#E73B4C' : '#E3E8F1') + ';color:' + (canAfford ? '#fff' : '#9CA5B8') +
+      ';box-shadow:0 4px 0 ' + (canAfford ? '#C71C2D' : '#C2CADB') + ';display:flex;align-items:center;justify-content:center;gap:8px;">' +
+      gemIcon(18, canAfford ? '#fff' : '#9CA5B8') + 'RECUPERAR · ' + REVIVE_COST + ' GEMAS</button>' +
+      (canAfford ? '' : '<div class="lives-hint">Você tem ' + S.gems + ' 💎. Faça lições para ganhar mais.</div>') +
       '<button class="btn-3d" data-act="close" style="background:#F0F3FA;color:#9CA5B8;box-shadow:none;padding:14px;font-size:14px;">SAIR DA LIÇÃO</button>' +
       '</div></div>';
     return html;
@@ -621,6 +682,7 @@
   var root = document.getElementById('app');
 
   function render() {
+    ensureDaily();
     var body;
     switch (S.screen) {
       case 'onboarding': body = viewOnboarding(); break;
@@ -679,20 +741,67 @@
     return ex.words ? ex.words.map(function (w, idx) { return { id: idx, w: w }; }) : [];
   }
   function initEx(i) {
-    var ex = TRAIL[S.cur].lesson.exercises[i];
+    var ex = S.activeExercises[i];
     Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [] });
     render();
     if (ex.audioEs) speak(ex.audioEs);
   }
   function startLesson(gi) {
-    if (S.hearts <= 0) { S.screen = 'lives'; S.cur = gi; render(); return; }
-    var ex = TRAIL[gi].lesson.exercises[0];
+    if (S.hearts <= 0) { S.screen = 'lives'; S.cur = gi; S.daily = false; render(); return; }
+    var exs = TRAIL[gi].lesson.exercises;
     Object.assign(S, {
-      screen: 'lesson', cur: gi, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [],
+      screen: 'lesson', cur: gi, daily: false, activeExercises: exs, correct: 0, exIndex: 0,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [],
     });
     render();
-    if (ex.audioEs) speak(ex.audioEs);
+    if (exs[0].audioEs) speak(exs[0].audioEs);
+  }
+
+  // ---- Desafio diário ----
+  // RNG determinístico por dia (mesmo desafio o dia todo).
+  function seededRng(seedStr) {
+    var h = 1779033703 ^ seedStr.length;
+    for (var i = 0; i < seedStr.length; i++) {
+      h = Math.imul(h ^ seedStr.charCodeAt(i), 3432918353);
+      h = (h << 13) | (h >>> 19);
+    }
+    return function () {
+      h = Math.imul(h ^ (h >>> 16), 2246822507);
+      h = Math.imul(h ^ (h >>> 13), 3266489909);
+      h ^= h >>> 16;
+      return (h >>> 0) / 4294967296;
+    };
+  }
+  // Exercícios já aprendidos (lições concluídas); fallback p/ a 1ª lição.
+  function dailyPool() {
+    var pool = [];
+    var maxLesson = Math.max(1, S.progress);
+    for (var i = 0; i < maxLesson && i < TRAIL.length; i++) {
+      TRAIL[i].lesson.exercises.forEach(function (ex) { pool.push(ex); });
+    }
+    return pool;
+  }
+  function buildDaily() {
+    var pool = dailyPool();
+    var rng = seededRng('camino-' + todayStr());
+    // embaralha cópia
+    var arr = pool.slice();
+    for (var i = arr.length - 1; i > 0; i--) {
+      var j = Math.floor(rng() * (i + 1));
+      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    }
+    return arr.slice(0, Math.min(5, arr.length));
+  }
+  function startDaily() {
+    if (S.hearts <= 0) { set({ screen: 'lives', daily: true }); return; }
+    var exs = buildDaily();
+    if (!exs.length) { toast('Conclua uma lição para liberar o desafio'); return; }
+    Object.assign(S, {
+      screen: 'lesson', cur: -1, daily: true, activeExercises: exs, correct: 0, exIndex: 0,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [],
+    });
+    render();
+    if (exs[0].audioEs) speak(exs[0].audioEs);
   }
   function verify() {
     var ex = curEx();
@@ -710,8 +819,16 @@
     if (S.hearts <= 0) { set({ screen: 'lives' }); return; }
     var len = curLessonLen();
     if (S.exIndex >= len - 1) {
-      var gained = 15 + S.correct * 5;
-      set({ screen: 'complete', gainedXp: gained });
+      var gained, gems;
+      if (S.daily) {
+        // desafio diário: bônus generoso (precisão pesa) + gemas extras
+        gained = 30 + S.correct * 6;
+        gems = 15;
+      } else {
+        gained = 15 + S.correct * 5;
+        gems = 3 + S.correct;
+      }
+      set({ screen: 'complete', gainedXp: gained, gainedGems: gems });
     } else {
       initEx(S.exIndex + 1);
     }
@@ -724,18 +841,38 @@
     S.streak = (S.lastActive === yest) ? S.streak + 1 : 1;
     S.lastActive = today;
   }
+  // Zera o XP do dia quando vira o dia.
+  function ensureDaily() {
+    var today = todayStr();
+    if (S.xpTodayDate !== today) { S.xpTodayDate = today; S.xpToday = 0; }
+  }
+  function awardXp(xp, gems) {
+    ensureDaily();
+    S.totalXp += xp;
+    S.xpToday += xp;
+    S.gems += (gems || 0);
+  }
   function finishLesson() {
     var completedLevel = -1;
+    if (S.daily) {
+      // desafio diário: recompensa, marca o dia, sem mexer no progresso
+      awardXp(S.gainedXp, S.gainedGems);
+      S.dailyDoneDate = todayStr();
+      bumpStreak();
+      S.daily = false;
+      set({ screen: 'home', homeLevel: null });
+      setTimeout(function () { toast(svg(IC.flame, 16, '#FFB259') + 'Desafio do dia concluído! +' + S.gainedGems + ' 💎'); }, 350);
+      return;
+    }
     // conclui a lição em curso, se ainda não estava concluída
     if (S.cur === S.progress) {
       var node = TRAIL[S.cur];
       S.progress = Math.min(TOTAL_LESSONS, S.progress + 1);
-      // a lição era a última do nível? então subimos de nível
       if (node && S.progress >= LEVEL_BOUNDS[node.levelIdx].end) completedLevel = node.levelIdx;
     }
-    S.totalXp += S.gainedXp;
+    awardXp(S.gainedXp, S.gainedGems);
     bumpStreak();
-    S.homeLevel = null; // volta a focar o nível atual
+    S.homeLevel = null;
     if (completedLevel >= 0) {
       set({ screen: 'levelup', levelUpIdx: completedLevel });
     } else {
@@ -813,7 +950,13 @@
       case 'verify': verify(); break;
       case 'next': next(); break;
       case 'finish': finishLesson(); break;
-      case 'revive': set({ screen: 'lesson', hearts: HEARTS_MAX, heartsTs: Date.now(), selected: null, checked: false, lastOk: false, bank: buildBank(curEx()), answer: [] }); toast('Vidas recuperadas!'); break;
+      case 'revive':
+        if (S.gems < REVIVE_COST) { toast('Gemas insuficientes'); break; }
+        S.gems -= REVIVE_COST;
+        set({ screen: 'lesson', hearts: HEARTS_MAX, heartsTs: Date.now(), selected: null, checked: false, lastOk: false, bank: buildBank(curEx()), answer: [] });
+        toast('Vidas recuperadas! 💖');
+        break;
+      case 'startDaily': startDaily(); break;
       case 'speak': speak(curEx().audioEs); break;
       case 'speakSlow': speak(curEx().audioEs, 0.55); break;
       case 'rename': {
