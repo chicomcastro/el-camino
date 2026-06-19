@@ -318,6 +318,23 @@ a { touch-action: manipulation; }
 }
 .chip:active { transform: translateY(2px); }
 
+/* exercício de fala (speak) */
+.speak { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.speak-phrase { display: flex; align-items: center; gap: 14px; width: 100%; background: #F5F0FF;
+  border: 1.5px solid #E0D2FA; border-radius: 16px; padding: 14px 16px; }
+.speak-phrase .play.sm { width: 50px; height: 50px; border-radius: 14px; }
+.speak-phrase .es { font-size: 20px; font-weight: 700; color: #5C19B1; }
+.speak-phrase .hint { font-size: 13px; font-weight: 600; color: var(--c-muted); margin-top: 2px; }
+.mic { width: 88px; height: 88px; border: none; border-radius: 50%; background: var(--c-purple);
+  display: flex; align-items: center; justify-content: center; cursor: pointer; margin-top: 6px;
+  box-shadow: 0 8px 0 var(--c-purple-dk); transition: transform 0.08s, box-shadow 0.08s; }
+.mic:active { transform: translateY(4px); box-shadow: 0 4px 0 var(--c-purple-dk); }
+.mic.on { animation: camPulse 1.3s ease-in-out infinite; }
+.mic-label { font-size: 13.5px; font-weight: 700; color: var(--c-ink-2); }
+.speak-skip { border: none; background: transparent; color: var(--c-muted); font-size: 12.5px;
+  font-weight: 600; cursor: pointer; padding: 6px; text-decoration: underline; }
+.mic-result { font-size: 13.5px; font-weight: 500; color: var(--c-ink-2); text-align: center; }
+
 /* footer / verificar */
 .footer { flex-shrink: 0; }
 .feedback { padding: 16px 22px 12px; }

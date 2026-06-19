@@ -134,6 +134,9 @@
   S.daily = false;    // estamos no desafio diário?
   S.review = false;   // estamos numa sessão de revisão espaçada?
   S.replay = false;   // estamos refazendo uma lição já concluída?
+  S.speakStatus = 'idle'; // idle | listening | done (exercício de fala)
+  S.speakHeard = '';      // transcrição reconhecida
+  S.speakMode = null;     // 'fallback' quando não há reconhecimento de voz
   S.activeExercises = []; // exercícios da sessão em curso
   S.exIndex = 0;
   S.selected = null;
@@ -481,6 +484,7 @@
     var len = curLessonLen();
     var isMcq = ex.type === 'mcq';
     var isBank = ex.type === 'bank' || ex.type === 'listen';
+    var isSpeak = ex.type === 'speak';
     var pct = Math.round(((S.exIndex + (S.checked ? 1 : 0)) / len) * 100);
     var hc = heartsColor(S.hearts);
 
@@ -516,6 +520,29 @@
         '<div class="box"><div class="txt">' + esc(ex.bubblePt) + '</div><span class="tail"></span></div></div>';
     }
 
+    // SPEAK (pronúncia / fala)
+    if (isSpeak) {
+      var st = S.speakStatus || 'idle';
+      var micPath = 'M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z';
+      var spkPath = 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z';
+      html += '<div class="speak">';
+      html += '<div class="speak-phrase"><button class="play sm" data-act="speak">' + svg(spkPath, 26, '#fff') + '</button>' +
+        '<div style="flex:1;"><div class="es">' + esc(ex.es) + '</div>' +
+        (ex.pt ? '<div class="hint">' + esc(ex.pt) + '</div>' : '') + '</div></div>';
+      if (S.speakMode === 'fallback') {
+        html += '<div class="mic-label">Seu navegador não reconhece voz aqui. Ouça e repita em voz alta.</div>';
+        if (!S.checked) html += '<button class="btn-3d" data-act="speakSelfOk" style="margin-top:6px;background:#9D55FF;box-shadow:0 4px 0 #7A26E0;">JÁ REPETI EM VOZ ALTA</button>';
+      } else if (!S.checked) {
+        html += '<button class="mic' + (st === 'listening' ? ' on' : '') + '" data-act="micStart">' + svg(micPath, 36, '#fff') + '</button>';
+        html += '<div class="mic-label">' + (st === 'listening' ? 'Ouvindo… fale agora 🎤' : 'Toque no microfone e fale') + '</div>';
+        html += '<button class="speak-skip" data-act="speakSkip">Não consigo falar agora</button>';
+      }
+      if (S.checked && S.speakHeard) {
+        html += '<div class="mic-result">Você disse: <b>' + esc(S.speakHeard) + '</b></div>';
+      }
+      html += '</div>';
+    }
+
     // MCQ
     if (isMcq) {
       html += '<div class="mcq">';
@@ -548,30 +575,36 @@
     html += '</div>'; // lesson-body
 
     // footer / verificar
-    var canVerify = isMcq ? S.selected !== null : S.answer.length > 0;
+    var canVerify = isMcq ? S.selected !== null : (isBank ? S.answer.length > 0 : false);
     var enabled = S.checked || canVerify;
     var footerBg = !S.checked ? '#fff' : (S.lastOk ? '#E7FEEA' : '#FFF4E5');
-    var correctAnswer = ex.type === 'mcq'
-      ? (ex.options ? ex.options[ex.correct] : '')
-      : (ex.solution ? ex.solution.join(' ') : '');
+    var correctAnswer = isSpeak ? ex.es
+      : (ex.type === 'mcq' ? (ex.options ? ex.options[ex.correct] : '')
+      : (ex.solution ? ex.solution.join(' ') : ''));
 
     html += '<div class="footer">';
     if (S.checked) {
       var fg = S.lastOk ? '#0B8C21' : '#8E570B';
       var icon = S.lastOk ? IC.checkC : IC.alert;
-      var title = S.lastOk ? '¡Muito bem!' : 'Resposta correta';
+      var title = S.lastOk ? (isSpeak ? '¡Bien dicho!' : '¡Muito bem!') : (isSpeak ? 'Continue praticando — imite o áudio' : 'Resposta correta');
       html += '<div class="feedback" style="background:' + footerBg + ';">' +
         '<div class="ttl" style="color:' + fg + ';">' + svg(icon, 22, fg) + '<span>' + title + '</span></div>' +
         '<div class="msg" style="color:' + fg + ';">' + esc(correctAnswer) + '</div></div>';
     }
-    var vBg = !enabled ? '#E3E8F1' : (S.checked && !S.lastOk ? '#E8A13C' : '#1AC136');
-    var vColor = !enabled ? '#9CA5B8' : '#fff';
-    var vShadow = !enabled ? '#C2CADB' : (S.checked && !S.lastOk ? '#C27B17' : '#0B8C21');
-    var vLabel = S.checked ? 'CONTINUAR' : 'VERIFICAR';
-    var vAct = enabled ? (S.checked ? 'next' : 'verify') : '';
-    html += '<div class="verify-wrap" style="background:' + footerBg + ';">' +
-      '<button class="btn-3d" ' + (enabled ? 'data-act="' + vAct + '"' : 'disabled') +
-      ' style="color:' + vColor + ';background:' + vBg + ';box-shadow:0 4px 0 ' + vShadow + ';">' + vLabel + '</button></div>';
+    // speak antes de responder não tem botão (a ação é o microfone)
+    var showBtn = !(isSpeak && !S.checked);
+    if (showBtn) {
+      var vBg = !enabled ? '#E3E8F1' : (S.checked && !S.lastOk ? '#E8A13C' : '#1AC136');
+      var vColor = !enabled ? '#9CA5B8' : '#fff';
+      var vShadow = !enabled ? '#C2CADB' : (S.checked && !S.lastOk ? '#C27B17' : '#0B8C21');
+      var vLabel = S.checked ? 'CONTINUAR' : 'VERIFICAR';
+      var vAct = enabled ? (S.checked ? 'next' : 'verify') : '';
+      html += '<div class="verify-wrap" style="background:' + footerBg + ';">' +
+        '<button class="btn-3d" ' + (enabled ? 'data-act="' + vAct + '"' : 'disabled') +
+        ' style="color:' + vColor + ';background:' + vBg + ';box-shadow:0 4px 0 ' + vShadow + ';">' + vLabel + '</button></div>';
+    } else {
+      html += '<div class="verify-wrap" style="background:' + footerBg + ';"></div>';
+    }
     html += '</div>';
 
     return html;
@@ -829,6 +862,64 @@
   }
 
   // ===========================================================
+  //  Reconhecimento de fala (exercício "speak") via Web Speech API
+  // ===========================================================
+  function speechRecognitionAvailable() {
+    return !!(window.SpeechRecognition || window.webkitSpeechRecognition);
+  }
+  // Normaliza para comparar: minúsculas, sem acentos/pontuação.
+  function normPhrase(s) {
+    return (s || '').toLowerCase().normalize('NFD').replace(/[̀-ͯ]/g, '')
+      .replace(/[^a-z0-9ñ\s]/g, '').replace(/\s+/g, ' ').trim();
+  }
+  // Compara o que foi dito com o alvo (tolerante).
+  function speakMatch(heard, target) {
+    var h = normPhrase(heard), t = normPhrase(target);
+    if (!h || !t) return false;
+    if (h === t || h.indexOf(t) >= 0) return true; // exato ou disse a frase com palavras extras
+    var tw = t.split(' '), hw = h.split(' ');
+    var hit = tw.filter(function (w) { return hw.indexOf(w) >= 0; }).length;
+    return (hit / tw.length) >= 0.6;
+  }
+  var _recog = null;
+  function micStart() {
+    if (S.checked) return;
+    if (!speechRecognitionAvailable()) { set({ speakMode: 'fallback' }); return; }
+    var ex = curEx();
+    try {
+      var SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      _recog = new SR();
+      _recog.lang = 'es-ES';
+      _recog.interimResults = false;
+      _recog.maxAlternatives = 3;
+      _recog.onresult = function (e) {
+        var alts = [];
+        try { for (var i = 0; i < e.results[0].length; i++) alts.push(e.results[0][i].transcript); } catch (err) {}
+        var ok = alts.some(function (a) { return speakMatch(a, ex.es); });
+        S.speakHeard = alts[0] || '';
+        S.speakStatus = 'done';
+        commitSpeak(ok);
+      };
+      _recog.onerror = function (ev) {
+        if (ev && (ev.error === 'not-allowed' || ev.error === 'service-not-allowed')) S.speakMode = 'fallback';
+        S.speakStatus = 'idle'; render();
+      };
+      _recog.onend = function () { if (S.speakStatus === 'listening') { S.speakStatus = 'idle'; render(); } };
+      S.speakStatus = 'listening'; render();
+      _recog.start();
+    } catch (e) { set({ speakMode: 'fallback' }); }
+  }
+  // Confirma o resultado da fala (sem tirar vidas — prática de baixo risco).
+  function commitSpeak(ok) {
+    S.checked = true;
+    S.lastOk = ok;
+    if (ok) { S.correct += 1; SFX.correct(); } else { SFX.wrong(); }
+    srsRecord(EX_ID_OF.get(curEx()), ok);
+    persist();
+    render();
+  }
+
+  // ===========================================================
   //  Efeitos sonoros (WebAudio, sintetizados — sem arquivos)
   // ===========================================================
   var _actx = null;
@@ -882,9 +973,10 @@
   }
   function initEx(i) {
     var ex = S.activeExercises[i];
-    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [] });
+    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [], speakStatus: 'idle', speakHeard: '' });
     render();
     if (ex.audioEs) speak(ex.audioEs);
+    else if (ex.type === 'speak' && ex.es) speak(ex.es);
   }
   function startLesson(gi) {
     // refazer (replay) = lição já concluída (gi < progresso): revisão,
@@ -894,10 +986,10 @@
     var exs = TRAIL[gi].lesson.exercises;
     Object.assign(S, {
       screen: 'lesson', cur: gi, daily: false, review: false, replay: replay, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [],
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '',
     });
     render();
-    if (exs[0].audioEs) speak(exs[0].audioEs);
+    if (exs[0].audioEs) speak(exs[0].audioEs); else if (exs[0].type === 'speak' && exs[0].es) speak(exs[0].es);
   }
 
   // ---- Desafio diário ----
@@ -955,10 +1047,10 @@
     if (!exs.length) { toast('Conclua uma lição para liberar o desafio'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -1, daily: true, review: false, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [],
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '',
     });
     render();
-    if (exs[0].audioEs) speak(exs[0].audioEs);
+    if (exs[0].audioEs) speak(exs[0].audioEs); else if (exs[0].type === 'speak' && exs[0].es) speak(exs[0].es);
   }
 
   // ---- Revisão espaçada (Leitner) ----
@@ -989,10 +1081,10 @@
     if (!exs.length) { toast('Nada para revisar agora 🙌'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -2, daily: false, review: true, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [],
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '',
     });
     render();
-    if (exs[0].audioEs) speak(exs[0].audioEs);
+    if (exs[0].audioEs) speak(exs[0].audioEs); else if (exs[0].type === 'speak' && exs[0].es) speak(exs[0].es);
   }
 
   function verify() {
@@ -1193,8 +1285,11 @@
         if (on) SFX.correct();
         break;
       }
-      case 'speak': speak(curEx().audioEs); break;
-      case 'speakSlow': speak(curEx().audioEs, 0.55); break;
+      case 'speak': speak(curEx().audioEs || curEx().es); break;
+      case 'speakSlow': speak(curEx().audioEs || curEx().es, 0.55); break;
+      case 'micStart': micStart(); break;
+      case 'speakSkip': S.speakHeard = ''; S.speakStatus = 'done'; commitSpeak(true); break;
+      case 'speakSelfOk': S.speakHeard = ''; S.speakStatus = 'done'; commitSpeak(true); break;
       case 'rename': {
         var nn = window.prompt('Como você quer ser chamado?', S.name);
         if (nn && nn.trim()) set({ name: nn.trim().slice(0, 24) });
@@ -1239,6 +1334,9 @@
       window.speechSynthesis.onvoiceschanged = function () {};
     }
   } catch (e) {}
+
+  // hook de teste (inofensivo em produção)
+  try { window.CAMINO_TEST = { speakMatch: speakMatch, normPhrase: normPhrase }; } catch (e) {}
 
   render();
 })();
