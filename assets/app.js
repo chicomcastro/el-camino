@@ -28,6 +28,8 @@
   function defaults() {
     return {
       name: 'Lucas',
+      onboarded: false,     // já passou pelo onboarding?
+      dailyGoalXp: 50,      // meta diária de XP
       progress: 0,          // nº de lições concluídas (índice da lição atual)
       totalXp: 0,
       hearts: HEARTS_MAX,
@@ -41,11 +43,16 @@
     var saved = {};
     try { saved = JSON.parse(localStorage.getItem(STORE_KEY)) || {}; } catch (e) {}
     var s = Object.assign(defaults(), saved);
+    // Migração: quem já usava o app antes do onboarding não deve revê-lo.
+    if (saved.onboarded === undefined && (saved.name !== undefined || saved.progress)) {
+      s.onboarded = true;
+    }
     return s;
   }
   function persist() {
     var p = {
-      name: S.name, progress: S.progress, totalXp: S.totalXp,
+      name: S.name, onboarded: S.onboarded, dailyGoalXp: S.dailyGoalXp,
+      progress: S.progress, totalXp: S.totalXp,
       hearts: S.hearts, heartsTs: S.heartsTs, streak: S.streak, lastActive: S.lastActive,
     };
     try { localStorage.setItem(STORE_KEY, JSON.stringify(p)); } catch (e) {}
@@ -69,7 +76,9 @@
   regenHearts();
 
   // runtime (não persiste)
-  S.screen = 'home';
+  S.screen = S.onboarded ? 'home' : 'onboarding';
+  S.obStep = 0;       // passo do onboarding
+  S.obGoal = S.dailyGoalXp; // seleção temporária de meta no onboarding
   S.cur = null;       // índice global da lição em curso
   S.exIndex = 0;
   S.selected = null;
@@ -80,6 +89,14 @@
   S.answer = [];
   S.gainedXp = 0;
   S.shakeKey = 0;
+
+  // Opções de meta diária (XP/dia ≈ minutos).
+  var GOALS = [
+    { xp: 20,  label: 'Casual',  mins: '5 min/dia' },
+    { xp: 50,  label: 'Regular', mins: '10 min/dia' },
+    { xp: 100, label: 'Sério',   mins: '15 min/dia' },
+    { xp: 150, label: 'Intenso', mins: '20 min/dia' },
+  ];
 
   function set(patch) { Object.assign(S, patch); persist(); render(); }
 
@@ -122,6 +139,56 @@
   // ===========================================================
   //  Telas
   // ===========================================================
+
+  // ---- Onboarding (primeira execução) ----
+  function obDots(step) {
+    var html = '<div class="ob-dots">';
+    for (var i = 0; i < 3; i++) {
+      html += '<i class="' + (i === step ? 'on' : (i < step ? 'done' : '')) + '"></i>';
+    }
+    return html + '</div>';
+  }
+
+  function viewOnboarding() {
+    var step = S.obStep;
+    var html = '<div class="onboarding">' + obDots(step);
+
+    if (step === 0) {
+      html += '<div class="ob-body">' +
+        '<div class="pop" style="margin-bottom:8px;">' + mascot(150, 'happy') + '</div>' +
+        '<h1 class="ob-title">¡Hola! Eu sou a Paloma 🕊️</h1>' +
+        '<p class="ob-text">Vou te acompanhar nessa jornada para você se virar em espanhol na viagem, puxar conversa com estranhos e compartilhar sua fé. Bora começar?</p>' +
+        '</div>' +
+        '<div class="ob-cta"><button class="btn-3d" data-act="obNext" style="background:#1AC136;box-shadow:0 4px 0 #0B8C21;">VAMOS!</button></div>';
+    } else if (step === 1) {
+      html += '<div class="ob-body">' +
+        '<div style="margin-bottom:6px;">' + mascot(96, 'happy') + '</div>' +
+        '<h1 class="ob-title">Como posso te chamar?</h1>' +
+        '<p class="ob-text">Vou usar seu nome pra te incentivar pelo caminho.</p>' +
+        '<input id="ob-name" class="ob-input" type="text" inputmode="text" autocomplete="given-name" ' +
+        'maxlength="24" placeholder="Seu nome" value="' + esc(S.name === 'Lucas' && !S.onboarded ? '' : S.name) + '">' +
+        '</div>' +
+        '<div class="ob-cta"><button class="btn-3d" data-act="obName" style="background:#1AC136;box-shadow:0 4px 0 #0B8C21;">CONTINUAR</button></div>';
+    } else {
+      html += '<div class="ob-body" style="justify-content:flex-start;padding-top:8px;">' +
+        '<h1 class="ob-title">Qual sua meta diária?</h1>' +
+        '<p class="ob-text">Você pode mudar depois no perfil.</p>' +
+        '<div class="ob-goals">';
+      GOALS.forEach(function (g) {
+        var sel = S.obGoal === g.xp;
+        html += '<button class="ob-goal' + (sel ? ' sel' : '') + '" data-act="obGoal" data-xp="' + g.xp + '">' +
+          '<div class="g-left"><span class="g-label">' + g.label + (g.xp === 50 ? ' · recomendado' : '') + '</span>' +
+          '<span class="g-mins">' + g.mins + '</span></div>' +
+          '<span class="g-xp">' + g.xp + ' XP</span></button>';
+      });
+      html += '</div></div>' +
+        '<div class="ob-cta"><button class="btn-3d" data-act="obFinish" style="background:#1AC136;box-shadow:0 4px 0 #0B8C21;">COMEÇAR A TRILHA</button></div>';
+    }
+
+    html += '</div>';
+    return html;
+  }
+
   function viewHome() {
     var pattern = [0, 46, 66, 46, 0, -46, -66, -46];
     var html = '';
@@ -392,9 +459,25 @@
       html += '<div class="ach"><div class="medal" style="background:' + bg + ';border-color:' + ring + ';">' +
         svg(IC[a.icon], 28, iconColor) + '</div><span class="nm" style="color:' + labelColor + ';">' + esc(a.name) + '</span></div>';
     });
-    html += '</div>';
+    html += '</div></div>';
+
+    // preferências
+    var goal = GOALS.find(function (g) { return g.xp === S.dailyGoalXp; }) || GOALS[1];
+    html += '<div style="padding:0 22px 8px;"><div class="section-ttl">Preferências</div>' +
+      '<button class="pref-row" data-act="changeGoal">' +
+      '<div class="pref-ic" style="background:#FFF4E5;">' + svg(IC.star, 20, '#E8A13C') + '</div>' +
+      '<div class="pref-txt"><span class="pref-t">Meta diária</span>' +
+      '<span class="pref-s">' + goal.label + ' · ' + S.dailyGoalXp + ' XP por dia</span></div>' +
+      svg('M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z', 22, '#C2CADB') + '</button>' +
+      '<button class="pref-row" data-act="rename">' +
+      '<div class="pref-ic" style="background:#E5EEFF;">' + svg(IC.account, 20, '#3C76E8') + '</div>' +
+      '<div class="pref-txt"><span class="pref-t">Nome</span>' +
+      '<span class="pref-s">' + esc(name) + '</span></div>' +
+      svg('M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z', 22, '#C2CADB') + '</button>' +
+      '</div>';
+
     html += '<button class="reset-btn" data-act="reset">Reiniciar progresso</button>';
-    html += '</div>';
+    html += '<div style="height:14px;"></div>';
 
     html += '</div>'; // scroll
     html += bottomnav('profile');
@@ -409,6 +492,7 @@
   function render() {
     var body;
     switch (S.screen) {
+      case 'onboarding': body = viewOnboarding(); break;
       case 'lesson':   body = viewLesson(); break;
       case 'complete': body = viewComplete(); break;
       case 'lives':    body = viewLives(); break;
@@ -417,6 +501,12 @@
     }
     root.innerHTML = '<div class="screen" data-screen="' + S.screen + '">' + body + '</div>' +
       '<div class="toast" id="toast"></div>';
+
+    // Foco no campo de nome do onboarding.
+    if (S.screen === 'onboarding' && S.obStep === 1) {
+      var inp = document.getElementById('ob-name');
+      if (inp) setTimeout(function () { try { inp.focus(); } catch (e) {} }, 60);
+    }
   }
 
   var toastTimer = null;
@@ -521,6 +611,26 @@
     var act = t.getAttribute('data-act');
 
     switch (act) {
+      case 'obNext': set({ obStep: S.obStep + 1 }); break;
+      case 'obName': {
+        var inp = document.getElementById('ob-name');
+        var nm = inp && inp.value ? inp.value.trim().slice(0, 24) : '';
+        if (!nm) { toast('Digite seu nome 🙂'); if (inp) inp.focus(); break; }
+        set({ name: nm, obStep: 2 });
+        break;
+      }
+      case 'obGoal': set({ obGoal: parseInt(t.getAttribute('data-xp'), 10) }); break;
+      case 'obFinish':
+        set({ onboarded: true, dailyGoalXp: S.obGoal, screen: 'home', obStep: 0 });
+        setTimeout(function () { toast('¡Vamos, ' + esc(S.name) + '! Sua trilha começa aqui 🚀'); }, 350);
+        break;
+      case 'changeGoal': {
+        var idx = GOALS.findIndex(function (g) { return g.xp === S.dailyGoalXp; });
+        var nextGoal = GOALS[(idx + 1) % GOALS.length];
+        set({ dailyGoalXp: nextGoal.xp });
+        toast('Meta diária: ' + nextGoal.xp + ' XP/dia');
+        break;
+      }
       case 'start': startLesson(parseInt(t.getAttribute('data-gi'), 10)); break;
       case 'goHome': set({ screen: 'home' }); break;
       case 'goProfile': set({ screen: 'profile' }); break;
@@ -561,11 +671,21 @@
         if (window.confirm('Reiniciar todo o progresso? Esta ação não pode ser desfeita.')) {
           try { localStorage.removeItem(STORE_KEY); } catch (err) {}
           var d = defaults();
-          Object.assign(S, d, { screen: 'home', cur: null, exIndex: 0, correct: 0, gainedXp: 0, bank: [], answer: [], selected: null, checked: false });
+          Object.assign(S, d, { screen: 'onboarding', obStep: 0, obGoal: d.dailyGoalXp, cur: null, exIndex: 0, correct: 0, gainedXp: 0, bank: [], answer: [], selected: null, checked: false });
           persist(); render();
         }
         break;
       }
+    }
+  });
+
+  // Enter no campo de nome avança o onboarding.
+  root.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && e.target && e.target.id === 'ob-name') {
+      e.preventDefault();
+      var nm = e.target.value ? e.target.value.trim().slice(0, 24) : '';
+      if (!nm) { toast('Digite seu nome 🙂'); return; }
+      set({ name: nm, obStep: 2 });
     }
   });
 

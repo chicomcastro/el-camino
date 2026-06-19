@@ -11,6 +11,8 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
 
 ## Funcionalidades
 
+- **Onboarding** — na primeira vez, a Paloma se apresenta, pergunta o nome do
+  aprendiz e deixa escolher uma meta diária de XP (ajustável depois no perfil).
 - **Trilha** — caminho serpentina com 3 unidades temáticas em sequência, codificadas
   por cor: Viagem (azul), Conversa com estranhos (roxo), Evangelização (vermelho).
   Nós com estados concluído / atual / bloqueado e a mascote-pomba **Paloma** (com
