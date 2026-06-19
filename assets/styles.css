@@ -121,6 +121,31 @@ a { touch-action: manipulation; }
 .pill.xp     { background: #FFF4E5; color: var(--c-amber-tx); }
 .pill.medals { background: #FFE6E9; color: var(--c-red-tx); }
 .pill.streak { background: #FFF1E0; color: #B5530A; }
+.pill.gemspill { background: #E3F7FB; color: #0B6E7E; }
+.topbar .pill { padding: 5px 9px; }
+
+/* bloco "hoje": meta diária + desafio */
+.today { display: flex; align-items: center; gap: 14px; background: #fff; border: 1px solid var(--c-line-2);
+  border-radius: 16px; padding: 12px 14px; margin-bottom: 12px; }
+.today-ring { position: relative; flex-shrink: 0; width: 64px; height: 64px; }
+.today-ring .tr-center { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+.today-ring .tr-pct { font-size: 14px; font-weight: 800; color: var(--c-amber-tx); }
+.today-mid { flex: 1; }
+.today-mid .today-t { font-size: 14.5px; font-weight: 700; color: var(--c-ink); }
+.today-mid .today-s { font-size: 12.5px; font-weight: 600; color: var(--c-ink-2); margin-top: 2px; }
+
+.daily { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: #fff;
+  border: 2px solid var(--c-line-2); border-bottom-width: 4px; border-radius: 16px; padding: 12px 14px;
+  margin-bottom: 22px; cursor: pointer; transition: transform 0.08s; }
+.daily:active:not(.done):not(.locked) { transform: translateY(2px); border-bottom-width: 2px; }
+.daily.done { border-color: #CCFED5; cursor: default; }
+.daily.locked { cursor: default; opacity: 0.85; }
+.daily .d-ic { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.daily .d-mid { flex: 1; }
+.daily .d-t { font-size: 14.5px; font-weight: 800; color: var(--c-ink); }
+.daily .d-s { font-size: 12px; font-weight: 600; color: var(--c-ink-2); margin-top: 1px; }
+
+.lives-hint { font-size: 12px; font-weight: 600; color: var(--c-muted); text-align: center; }
 
 /* ---------- Mascote / saudação ---------- */
 .greet {
@@ -320,8 +345,9 @@ a { touch-action: manipulation; }
 .complete .sub { font-size: 14px; font-weight: 500; color: var(--c-ink-2); margin-top: 6px; text-align: center; }
 .stat-cards { display: flex; gap: 12px; margin-top: 30px; width: 100%; }
 .stat-card { flex: 1; border-radius: 16px; overflow: hidden; border: 2px solid; }
-.stat-card .cap { padding: 6px; text-align: center; font-size: 11px; font-weight: 800; letter-spacing: 1px; color: #fff; }
-.stat-card .val { display: flex; align-items: center; justify-content: center; gap: 6px; padding: 14px; font-size: 20px; font-weight: 800; }
+.stat-card .cap { padding: 6px 3px; text-align: center; font-size: 10px; font-weight: 800; letter-spacing: 0.5px; color: #fff; }
+.stat-card .val { display: flex; align-items: center; justify-content: center; gap: 4px; padding: 13px 6px; font-size: 17px; font-weight: 800; }
+.stat-cards { gap: 9px; }
 
 /* ---------- Sem vidas ---------- */
 .lives { flex: 1; display: flex; flex-direction: column; min-height: 0; }

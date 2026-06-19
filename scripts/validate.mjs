@@ -78,12 +78,12 @@ if (!DATA || !ICONS) {
   for (const a of DATA.achievements || []) {
     if (!a.id || !a.name) fail('conquista sem id/name');
     if (!ICONS[a.icon]) fail(`conquista ${a.id} usa ícone inexistente: "${a.icon}"`);
-    if (!['level', 'lessons', 'streak'].includes(a.kind)) fail(`conquista ${a.id}: kind inválido (${a.kind})`);
+    if (!['level', 'lessons', 'streak', 'xp'].includes(a.kind)) fail(`conquista ${a.id}: kind inválido (${a.kind})`);
     if (a.kind === 'level' && !levelIds.has(a.n)) fail(`conquista ${a.id}: nível "${a.n}" inexistente`);
     if (a.kind === 'lessons' && (typeof a.n !== 'number' || a.n < 1 || a.n > lessons)) {
       fail(`conquista ${a.id}: n (${a.n}) fora de 1..${lessons}`);
     }
-    if (a.kind === 'streak' && (typeof a.n !== 'number' || a.n < 1)) fail(`conquista ${a.id}: streak inválido`);
+    if ((a.kind === 'streak' || a.kind === 'xp') && (typeof a.n !== 'number' || a.n < 1)) fail(`conquista ${a.id}: n inválido`);
   }
 
   console.log(`Currículo: ${DATA.levels.length} níveis · ${modules} módulos · ${lessons} lições · ${exercises} exercícios · ${DATA.achievements.length} conquistas`);

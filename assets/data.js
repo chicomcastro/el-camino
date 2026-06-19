@@ -335,6 +335,7 @@ window.CAMINO_DATA = {
     { id: 'a-ini',    name: 'Iniciante feito',  icon: 'plane',  c: '#1AC136', bg: '#E7FEEA', kind: 'level',   n: 'iniciante' },
     { id: 'a-bas',    name: 'Básico feito',     icon: 'map',    c: '#3C76E8', bg: '#E5EEFF', kind: 'level',   n: 'basico' },
     { id: 'a-streak', name: 'Ofensiva de 3',    icon: 'flame',  c: '#E8730C', bg: '#FFF1E0', kind: 'streak',  n: 3 },
+    { id: 'a-xp',     name: '500 XP',           icon: 'medal',  c: '#E8A13C', bg: '#FFF4E5', kind: 'xp',      n: 500 },
     { id: 'a-msg',    name: 'Mensageiro',       icon: 'heart',  c: '#E73B4C', bg: '#FFE6E9', kind: 'level',   n: 'inter1' },
     { id: 'a-test',   name: 'Testemunha',       icon: 'book',   c: '#7A26E0', bg: '#F5F0FF', kind: 'level',   n: 'inter2' },
     { id: 'a-adv',    name: 'Comunicador',      icon: 'chat',   c: '#E8730C', bg: '#FFF1E0', kind: 'level',   n: 'avan1' },

@@ -24,11 +24,15 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
 - **Lição** — exercícios funcionais: múltipla escolha com áudio, "monte a frase"
   (banco de palavras) e ditado ("toque no que você ouve"), com barra de progresso,
   feedback de acerto/erro e voz em espanhol (Web Speech API).
-- **Conclusão** — celebração com confete, XP ganho e precisão.
-- **Sem vidas** — tela de recuperação quando os corações acabam.
+- **Desafio do dia** — uma revisão rápida diária (exercícios sorteados do que já
+  foi aprendido, estáveis durante o dia) que dá bônus de XP e gemas.
+- **Conclusão** — celebração com confete, XP ganho, gemas e precisão.
+- **Sem vidas** — tela de recuperação: gaste **gemas** para repor as vidas (ou
+  espere a regeneração com o tempo).
 - **Perfil** — estatísticas, progresso por tema e grade de conquistas.
-- **Gamificação** — XP, vidas (com regeneração ao longo do tempo), ofensiva
-  (streak) e medalhas/conquistas.
+- **Gamificação** — XP, meta diária com anel de progresso, ofensiva (streak),
+  **gemas** (moeda para repor vidas), vidas (regeneram com o tempo) e conquistas
+  (por nível, lições, ofensiva e XP).
 - **Progresso persistente** — XP, lições concluídas, vidas e ofensiva ficam salvos
   no `localStorage` do dispositivo.
 - **Instalável (PWA)** — pode ser adicionado à tela inicial do celular.
