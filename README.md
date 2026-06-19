@@ -23,6 +23,8 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   auréola, um aceno ao Espírito Santo). Dá para navegar entre níveis já abertos.
   Lições **concluídas podem ser refeitas** (tocar no nó) como revisão — rende XP
   reduzido, alimenta a revisão espaçada e não altera o progresso.
+- **Aprenda antes de treinar** — lições podem abrir com uma tela de introdução do
+  vocabulário (palavra + tradução + áudio ao tocar) antes dos exercícios.
 - **Lição** — variedade de exercícios: múltipla escolha com áudio, "monte a frase"
   (banco de palavras), ditado ("toque no que você ouve"), **preencher a lacuna**
   (cloze), **pareamento** (relacionar colunas ES↔PT) e **fala** (pronúncia: fale a
@@ -75,7 +77,8 @@ icon.svg                ícone (Paloma)
 
 Para adicionar conteúdo, edite `assets/data.js`: a estrutura é
 `levels → modules → lessons → exercises`. Cada lição traz uma lista de
-exercícios (`mcq`, `bank`, `listen`) e cada módulo carrega um tema/cor. As
+exercícios (`mcq`, `cloze`, `bank`, `listen`, `match`, `speak`), pode ter um
+`teach` opcional (intro de vocabulário) e cada módulo carrega um tema/cor. As
 conquistas (`achievements`) podem ser por nível concluído (`kind: 'level'`),
 nº de lições (`kind: 'lessons'`) ou ofensiva (`kind: 'streak'`).
 

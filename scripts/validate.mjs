@@ -84,6 +84,10 @@ if (!DATA || !ICONS) {
         if (lessonIds.has(l.id)) fail(`id de lição duplicado: ${l.id}`);
         lessonIds.add(l.id);
         if (!ICONS[l.icon]) fail(`lição ${l.id} usa ícone inexistente: "${l.icon}"`);
+        if (l.teach !== undefined) {
+          if (!Array.isArray(l.teach) || l.teach.length === 0) fail(`lição ${l.id}: "teach" deve ser uma lista não-vazia`);
+          (l.teach || []).forEach((t, i) => { if (!t || !t.es || !t.pt) fail(`lição ${l.id}: teach[${i}] precisa de es e pt`); });
+        }
         if (!Array.isArray(l.exercises) || l.exercises.length === 0) fail(`lição ${l.id} sem exercícios`);
         (l.exercises || []).forEach((ex, i) => { exercises++; checkExercise(ex, `${l.id}#${i} (${ex.type})`); });
       }

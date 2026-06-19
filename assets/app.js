@@ -482,6 +482,36 @@
   function curEx() { return (S.activeExercises && S.activeExercises[S.exIndex]) || {}; }
   function curLessonLen() { return (S.activeExercises && S.activeExercises.length) || 1; }
 
+  // Tela "aprenda" — introduz o vocabulário antes dos exercícios.
+  function viewTeach() {
+    var node = TRAIL[S.cur];
+    var lesson = node ? node.lesson : null;
+    var teach = (lesson && lesson.teach) || [];
+    var spkPath = 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z';
+
+    var html = '<div class="lesson-head">' +
+      '<button class="iconbtn" data-act="close">' + svg('M19,6.41L17.59,5L12,10.59L6.41,5L5,6.41L10.59,12L5,17.59L6.41,19L12,13.41L17.59,19L19,17.59L13.41,12L19,6.41Z', 24, '#9CA5B8') + '</button>' +
+      '<span style="font-size:16px;font-weight:800;color:#20293B;">' + esc(lesson ? lesson.title : '') + '</span></div>';
+
+    html += '<div class="lesson-body">';
+    html += '<div class="teach-head"><div class="mascot">' + mascot(58, 'happy') + '</div>' +
+      '<div><div class="teach-title">Aprenda primeiro</div>' +
+      '<div class="teach-sub">Toque para ouvir. Depois é só praticar!</div></div></div>';
+    html += '<div class="teach-list">';
+    teach.forEach(function (t) {
+      html += '<button class="teach-item" data-act="speakText" data-text="' + esc(t.es) + '">' +
+        '<div class="ti-ic">' + svg(spkPath, 22, '#9D55FF') + '</div>' +
+        '<div class="ti-tx"><div class="ti-es">' + esc(t.es) + '</div>' +
+        '<div class="ti-pt">' + esc(t.pt) + '</div></div></button>';
+    });
+    html += '</div></div>';
+
+    html += '<div class="footer"><div class="verify-wrap">' +
+      '<button class="btn-3d" data-act="teachDone" style="background:#1AC136;box-shadow:0 4px 0 #0B8C21;">COMEÇAR</button>' +
+      '</div></div>';
+    return html;
+  }
+
   function viewLesson() {
     var ex = curEx();
     var len = curLessonLen();
@@ -822,6 +852,7 @@
     var body;
     switch (S.screen) {
       case 'onboarding': body = viewOnboarding(); break;
+      case 'teach':    body = viewTeach(); break;
       case 'lesson':   body = viewLesson(); break;
       case 'complete': body = viewComplete(); break;
       case 'levelup':  body = viewLevelUp(); break;
@@ -1057,13 +1088,24 @@
     // não regride o progresso e rende XP reduzido.
     var replay = gi < S.progress;
     if (S.hearts <= 0) { S.screen = 'lives'; S.cur = gi; S.daily = false; S.review = false; S.replay = replay; render(); return; }
-    var exs = TRAIL[gi].lesson.exercises;
+    var lesson = TRAIL[gi].lesson;
+    var exs = lesson.exercises;
     Object.assign(S, {
-      screen: 'lesson', cur: gi, daily: false, review: false, replay: replay, activeExercises: exs, correct: 0, exIndex: 0,
+      cur: gi, daily: false, review: false, replay: replay, activeExercises: exs, correct: 0, exIndex: 0,
       selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null,
     });
+    // se a lição tem "aprenda", mostra a introdução antes dos exercícios
+    if (lesson.teach && lesson.teach.length) { S.screen = 'teach'; render(); return; }
+    S.screen = 'lesson';
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if (exs[0].type === 'speak' && exs[0].es) speak(exs[0].es);
+  }
+  // Sai da tela "aprenda" e começa os exercícios.
+  function beginExercises() {
+    S.screen = 'lesson';
+    render();
+    var ex0 = S.activeExercises[0];
+    if (ex0.audioEs) speak(ex0.audioEs); else if (ex0.type === 'speak' && ex0.es) speak(ex0.es);
   }
 
   // ---- Desafio diário ----
@@ -1364,6 +1406,8 @@
       case 'micStart': micStart(); break;
       case 'matchLeft': matchLeft(parseInt(t.getAttribute('data-i'), 10)); break;
       case 'matchRight': matchRight(parseInt(t.getAttribute('data-i'), 10)); break;
+      case 'teachDone': beginExercises(); break;
+      case 'speakText': speak(t.getAttribute('data-text')); break;
       case 'speakSkip': S.speakHeard = ''; S.speakStatus = 'done'; commitSpeak(true); break;
       case 'speakSelfOk': S.speakHeard = ''; S.speakStatus = 'done'; commitSpeak(true); break;
       case 'rename': {
