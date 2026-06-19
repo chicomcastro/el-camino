@@ -33,6 +33,8 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
 - **Gamificação** — XP, meta diária com anel de progresso, ofensiva (streak),
   **gemas** (moeda para repor vidas), vidas (regeneram com o tempo) e conquistas
   (por nível, lições, ofensiva e XP).
+- **Sons de feedback** — efeitos sonoros sintetizados (WebAudio, sem arquivos)
+  para acerto, erro, conclusão e subida de nível; com botão de mudo no perfil.
 - **Progresso persistente** — XP, lições concluídas, vidas e ofensiva ficam salvos
   no `localStorage` do dispositivo.
 - **Instalável (PWA)** — pode ser adicionado à tela inicial do celular.
