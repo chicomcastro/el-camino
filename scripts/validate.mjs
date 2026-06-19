@@ -21,9 +21,22 @@ const ICONS = globalThis.window.CAMINO_ICONS;
 
 function checkExercise(ex, where) {
   if (!ex.prompt) fail(`${where}: sem prompt`);
-  if (!['mcq', 'bank', 'listen', 'speak'].includes(ex.type)) fail(`${where}: tipo inválido (${ex.type})`);
+  if (!['mcq', 'bank', 'listen', 'speak', 'cloze', 'match'].includes(ex.type)) fail(`${where}: tipo inválido (${ex.type})`);
   if (ex.type === 'speak') {
     if (!ex.es || typeof ex.es !== 'string') fail(`${where}: exercício "speak" sem "es"`);
+    return;
+  }
+  if (ex.type === 'match') {
+    if (!Array.isArray(ex.pairs) || ex.pairs.length < 2) fail(`${where}: "match" precisa de >= 2 pares`);
+    (ex.pairs || []).forEach((p, i) => {
+      if (!Array.isArray(p) || p.length !== 2 || !p[0] || !p[1]) fail(`${where}: par ${i} inválido (espera ["es","pt"])`);
+    });
+    return;
+  }
+  if (ex.type === 'cloze') {
+    if (!ex.sentence || ex.sentence.indexOf('___') < 0) fail(`${where}: "cloze" precisa de "sentence" com "___"`);
+    if (!Array.isArray(ex.options) || ex.options.length < 2) fail(`${where}: poucas opções`);
+    if (typeof ex.correct !== 'number' || !ex.options || !ex.options[ex.correct]) fail(`${where}: índice "correct" inválido`);
     return;
   }
   if (ex.type === 'mcq') {

@@ -137,6 +137,9 @@
   S.speakStatus = 'idle'; // idle | listening | done (exercício de fala)
   S.speakHeard = '';      // transcrição reconhecida
   S.speakMode = null;     // 'fallback' quando não há reconhecimento de voz
+  S.matchSelLeft = null;  // pareamento: coluna esquerda selecionada
+  S.matchDone = [];       // pareamento: índices já casados
+  S.matchOrderR = null;   // pareamento: ordem (embaralhada) da coluna direita
   S.activeExercises = []; // exercícios da sessão em curso
   S.exIndex = 0;
   S.selected = null;
@@ -485,6 +488,8 @@
     var isMcq = ex.type === 'mcq';
     var isBank = ex.type === 'bank' || ex.type === 'listen';
     var isSpeak = ex.type === 'speak';
+    var isCloze = ex.type === 'cloze';
+    var isMatch = ex.type === 'match';
     var pct = Math.round(((S.exIndex + (S.checked ? 1 : 0)) / len) * 100);
     var hc = heartsColor(S.hearts);
 
@@ -543,6 +548,46 @@
       html += '</div>';
     }
 
+    // CLOZE (preencher a lacuna)
+    if (isCloze) {
+      var filled = S.selected != null ? ex.options[S.selected] : '_____';
+      var sentenceHtml = esc(ex.sentence).replace('___', '<span class="cloze-blank' + (S.selected != null ? ' filled' : '') + '">' + esc(filled) + '</span>');
+      html += '<div class="cloze-sentence">' + sentenceHtml + '</div>';
+      if (ex.pt) html += '<div class="cloze-hint">' + esc(ex.pt) + '</div>';
+      html += '<div class="mcq">';
+      ex.options.forEach(function (text, i) {
+        var bg = '#fff', border = '#CFD6E5', color = '#20293B';
+        if (S.checked) {
+          if (i === ex.correct) { bg = '#E7FEEA'; border = '#1AC136'; color = '#0B8C21'; }
+          else if (i === S.selected) { bg = '#FFF4E5'; border = '#E8A13C'; color = '#8E570B'; }
+        } else if (i === S.selected) { bg = '#FFE6E9'; border = '#FF8995'; color = '#C71C2D'; }
+        html += '<button class="opt" ' + (S.checked ? 'disabled' : 'data-act="select" data-i="' + i + '"') +
+          ' style="background:' + bg + ';border-color:' + border + ';"><span style="color:' + color + ';">' +
+          esc(text) + '</span></button>';
+      });
+      html += '</div>';
+    }
+
+    // MATCH (pareamento)
+    if (isMatch) {
+      var order = (S.matchOrderR && S.matchOrderR.length === ex.pairs.length) ? S.matchOrderR
+        : (S.matchOrderR = shuffledIdx(ex.pairs.length));
+      var done = S.matchDone || [];
+      html += '<div class="match"><div class="match-col">';
+      ex.pairs.forEach(function (p, i) {
+        var m = done.indexOf(i) >= 0, sel = S.matchSelLeft === i;
+        html += '<button class="match-chip' + (m ? ' matched' : '') + (sel ? ' sel' : '') + '" ' +
+          (m ? 'disabled' : 'data-act="matchLeft" data-i="' + i + '"') + '>' + esc(p[0]) + '</button>';
+      });
+      html += '</div><div class="match-col">';
+      order.forEach(function (i) {
+        var m = done.indexOf(i) >= 0;
+        html += '<button class="match-chip right' + (m ? ' matched' : '') + '" ' +
+          (m ? 'disabled' : 'data-act="matchRight" data-i="' + i + '"') + '>' + esc(ex.pairs[i][1]) + '</button>';
+      });
+      html += '</div></div>';
+    }
+
     // MCQ
     if (isMcq) {
       html += '<div class="mcq">';
@@ -575,24 +620,24 @@
     html += '</div>'; // lesson-body
 
     // footer / verificar
-    var canVerify = isMcq ? S.selected !== null : (isBank ? S.answer.length > 0 : false);
+    var canVerify = (isMcq || isCloze) ? S.selected !== null : (isBank ? S.answer.length > 0 : false);
     var enabled = S.checked || canVerify;
     var footerBg = !S.checked ? '#fff' : (S.lastOk ? '#E7FEEA' : '#FFF4E5');
     var correctAnswer = isSpeak ? ex.es
-      : (ex.type === 'mcq' ? (ex.options ? ex.options[ex.correct] : '')
-      : (ex.solution ? ex.solution.join(' ') : ''));
+      : ((isMcq || isCloze) ? (ex.options ? ex.options[ex.correct] : '')
+      : (isMatch ? '' : (ex.solution ? ex.solution.join(' ') : '')));
 
     html += '<div class="footer">';
     if (S.checked) {
       var fg = S.lastOk ? '#0B8C21' : '#8E570B';
       var icon = S.lastOk ? IC.checkC : IC.alert;
-      var title = S.lastOk ? (isSpeak ? '¡Bien dicho!' : '¡Muito bem!') : (isSpeak ? 'Continue praticando — imite o áudio' : 'Resposta correta');
+      var title = S.lastOk ? (isSpeak ? '¡Bien dicho!' : (isMatch ? '¡Perfecto!' : '¡Muito bem!')) : (isSpeak ? 'Continue praticando — imite o áudio' : 'Resposta correta');
       html += '<div class="feedback" style="background:' + footerBg + ';">' +
         '<div class="ttl" style="color:' + fg + ';">' + svg(icon, 22, fg) + '<span>' + title + '</span></div>' +
-        '<div class="msg" style="color:' + fg + ';">' + esc(correctAnswer) + '</div></div>';
+        (correctAnswer ? '<div class="msg" style="color:' + fg + ';">' + esc(correctAnswer) + '</div>' : '') + '</div>';
     }
-    // speak antes de responder não tem botão (a ação é o microfone)
-    var showBtn = !(isSpeak && !S.checked);
+    // speak/match antes de concluir não têm botão (a ação é o microfone / parear)
+    var showBtn = !((isSpeak || isMatch) && !S.checked);
     if (showBtn) {
       var vBg = !enabled ? '#E3E8F1' : (S.checked && !S.lastOk ? '#E8A13C' : '#1AC136');
       var vColor = !enabled ? '#9CA5B8' : '#fff';
@@ -909,6 +954,29 @@
       _recog.start();
     } catch (e) { set({ speakMode: 'fallback' }); }
   }
+  // ---- Pareamento (match) ----
+  function matchLeft(i) {
+    if (S.checked || (S.matchDone || []).indexOf(i) >= 0) return;
+    set({ matchSelLeft: i });
+  }
+  function matchRight(i) {
+    if (S.checked || (S.matchDone || []).indexOf(i) >= 0) return;
+    if (S.matchSelLeft == null) return;
+    if (S.matchSelLeft === i) {
+      S.matchDone = (S.matchDone || []).concat([i]);
+      S.matchSelLeft = null;
+      SFX.correct();
+      if (S.matchDone.length >= curEx().pairs.length) { commitMatch(); return; }
+      render();
+    } else {
+      S.matchSelLeft = null; SFX.wrong(); render();
+    }
+  }
+  function commitMatch() {
+    S.checked = true; S.lastOk = true; S.correct += 1;
+    srsRecord(EX_ID_OF.get(curEx()), true);
+    persist(); render();
+  }
   // Confirma o resultado da fala (sem tirar vidas — prática de baixo risco).
   function commitSpeak(ok) {
     S.checked = true;
@@ -971,9 +1039,15 @@
   function buildBank(ex) {
     return ex.words ? ex.words.map(function (w, idx) { return { id: idx, w: w }; }) : [];
   }
+  // Índices [0..n) embaralhados (coluna direita do pareamento).
+  function shuffledIdx(n) {
+    var a = []; for (var i = 0; i < n; i++) a.push(i);
+    for (var j = a.length - 1; j > 0; j--) { var k = Math.floor(Math.random() * (j + 1)); var t = a[j]; a[j] = a[k]; a[k] = t; }
+    return a;
+  }
   function initEx(i) {
     var ex = S.activeExercises[i];
-    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [], speakStatus: 'idle', speakHeard: '' });
+    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: ex.type === 'match' ? shuffledIdx(ex.pairs.length) : null });
     render();
     if (ex.audioEs) speak(ex.audioEs);
     else if (ex.type === 'speak' && ex.es) speak(ex.es);
@@ -986,7 +1060,7 @@
     var exs = TRAIL[gi].lesson.exercises;
     Object.assign(S, {
       screen: 'lesson', cur: gi, daily: false, review: false, replay: replay, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '',
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null,
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if (exs[0].type === 'speak' && exs[0].es) speak(exs[0].es);
@@ -1047,7 +1121,7 @@
     if (!exs.length) { toast('Conclua uma lição para liberar o desafio'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -1, daily: true, review: false, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '',
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null,
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if (exs[0].type === 'speak' && exs[0].es) speak(exs[0].es);
@@ -1081,7 +1155,7 @@
     if (!exs.length) { toast('Nada para revisar agora 🙌'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -2, daily: false, review: true, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '',
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null,
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if (exs[0].type === 'speak' && exs[0].es) speak(exs[0].es);
@@ -1090,7 +1164,7 @@
   function verify() {
     var ex = curEx();
     var ok;
-    if (ex.type === 'mcq') ok = S.selected === ex.correct;
+    if (ex.type === 'mcq' || ex.type === 'cloze') ok = S.selected === ex.correct;
     else ok = S.answer.map(function (a) { return a.w; }).join(' ') === ex.solution.join(' ');
     S.checked = true;
     S.lastOk = ok;
@@ -1288,6 +1362,8 @@
       case 'speak': speak(curEx().audioEs || curEx().es); break;
       case 'speakSlow': speak(curEx().audioEs || curEx().es, 0.55); break;
       case 'micStart': micStart(); break;
+      case 'matchLeft': matchLeft(parseInt(t.getAttribute('data-i'), 10)); break;
+      case 'matchRight': matchRight(parseInt(t.getAttribute('data-i'), 10)); break;
       case 'speakSkip': S.speakHeard = ''; S.speakStatus = 'done'; commitSpeak(true); break;
       case 'speakSelfOk': S.speakHeard = ''; S.speakStatus = 'done'; commitSpeak(true); break;
       case 'rename': {
