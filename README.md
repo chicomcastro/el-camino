@@ -21,6 +21,8 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   codificados por cor (Viagem = azul, Conversa = roxo, Evangelização = vermelho).
   Nós com estados concluído / atual / bloqueado e a mascote-pomba **Paloma** (com
   auréola, um aceno ao Espírito Santo). Dá para navegar entre níveis já abertos.
+  Lições **concluídas podem ser refeitas** (tocar no nó) como revisão — rende XP
+  reduzido, alimenta a revisão espaçada e não altera o progresso.
 - **Lição** — exercícios funcionais: múltipla escolha com áudio, "monte a frase"
   (banco de palavras) e ditado ("toque no que você ouve"), com barra de progresso,
   feedback de acerto/erro e voz em espanhol (Web Speech API).
