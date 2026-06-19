@@ -13,10 +13,14 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
 
 - **Onboarding** — na primeira vez, a Paloma se apresenta, pergunta o nome do
   aprendiz e deixa escolher uma meta diária de XP (ajustável depois no perfil).
-- **Trilha** — caminho serpentina com 3 unidades temáticas em sequência, codificadas
-  por cor: Viagem (azul), Conversa com estranhos (roxo), Evangelização (vermelho).
+- **Níveis** — jornada do zero à fluência em 7 níveis (Iniciante, Básico,
+  Intermediário 1 e 2, Avançado 1 e 2, Fluente). Cada nível reúne módulos com
+  dificuldade crescente; concluir um nível desbloqueia o próximo com uma
+  comemoração. A tela "Sua jornada" mostra todos os níveis e o progresso.
+- **Trilha** — a home foca o nível atual: caminho serpentina com módulos temáticos
+  codificados por cor (Viagem = azul, Conversa = roxo, Evangelização = vermelho).
   Nós com estados concluído / atual / bloqueado e a mascote-pomba **Paloma** (com
-  auréola, um aceno ao Espírito Santo).
+  auréola, um aceno ao Espírito Santo). Dá para navegar entre níveis já abertos.
 - **Lição** — exercícios funcionais: múltipla escolha com áudio, "monte a frase"
   (banco de palavras) e ditado ("toque no que você ouve"), com barra de progresso,
   feedback de acerto/erro e voz em espanhol (Web Speech API).
@@ -52,8 +56,11 @@ manifest.webmanifest    manifesto PWA
 icon.svg                ícone (Paloma)
 ```
 
-Para adicionar conteúdo, edite `assets/data.js` — cada nó da trilha é uma lição
-com sua lista de exercícios (`mcq`, `bank`, `listen`).
+Para adicionar conteúdo, edite `assets/data.js`: a estrutura é
+`levels → modules → lessons → exercises`. Cada lição traz uma lista de
+exercícios (`mcq`, `bank`, `listen`) e cada módulo carrega um tema/cor. As
+conquistas (`achievements`) podem ser por nível concluído (`kind: 'level'`),
+nº de lições (`kind: 'lessons'`) ou ofensiva (`kind: 'streak'`).
 
 ## Qualidade & deploy
 
