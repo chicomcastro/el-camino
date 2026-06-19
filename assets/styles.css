@@ -1,8 +1,9 @@
 /* ============================================================
    Camino — espanhol para missionários
    Design system Brendi · Montserrat · vermelho da marca.
-   Mobile-first: o app ocupa a tela toda no celular;
-   em telas largas, aparece centralizado num "frame" de celular.
+   App nativo mobile: o app preenche a tela inteira no celular.
+   Em telas largas, aparece como uma coluna de app (sem moldura
+   de "celular de brinquedo") centralizada num fundo neutro.
    ============================================================ */
 
 :root {
@@ -34,16 +35,27 @@
 html, body {
   height: 100%;
   font-family: var(--font);
-  background: var(--c-bg);
+  background: var(--c-surface);
   color: var(--c-ink);
   overscroll-behavior: none;
 }
 
-button { font-family: inherit; }
+/* Cara de app: sem seleção de texto acidental na UI (inputs liberados). */
+body {
+  -webkit-user-select: none; user-select: none;
+  -webkit-touch-callout: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+input, textarea { -webkit-user-select: text; user-select: text; }
+
+button { font-family: inherit; touch-action: manipulation; }
+a { touch-action: manipulation; }
 
 ::-webkit-scrollbar { width: 0; height: 0; }
 
 /* ---------- App shell ---------- */
+/* No celular: ocupa a tela inteira, sem moldura. */
 #app {
   position: relative;
   width: 100%;
@@ -54,74 +66,47 @@ button { font-family: inherit; }
   overflow: hidden;
 }
 
-/* Em telas largas: mostra o "celular" centralizado sobre o fundo cinza */
-@media (min-width: 540px) {
+/* Em telas largas: coluna de app centralizada num fundo neutro,
+   com cantos levemente arredondados e sombra suave — NÃO um celular. */
+@media (min-width: 600px) {
+  html, body {
+    background: radial-gradient(120% 120% at 50% 0%, #F3F5FA 0%, #E7EBF3 60%, #DFE4EE 100%);
+  }
   body {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    min-height: 100vh;
-    padding: 24px 16px;
+    display: flex; align-items: center; justify-content: center;
+    min-height: 100vh; padding: 20px;
   }
-  .brandbar { display: flex !important; }
   #app {
-    width: 392px;
-    height: min(812px, calc(100vh - 110px));
-    border-radius: 42px;
-    box-shadow: 0 34px 70px -24px rgba(20, 25, 40, 0.5);
-    border: 13px solid #0B0E14;
+    width: 100%;
+    max-width: 430px;
+    height: min(var(--app-h), 920px);
+    border-radius: 28px;
+    box-shadow: 0 24px 60px -20px rgba(20, 25, 40, 0.32), 0 0 0 1px rgba(20,25,40,0.04);
   }
 }
-
-/* Cabeçalho da marca (só no desktop) */
-.brandbar {
-  display: none;
-  align-items: center;
-  gap: 9px;
-  margin-bottom: 16px;
-}
-.brandbar .logo {
-  width: 26px; height: 26px; border-radius: 8px; background: var(--c-red);
-  display: flex; align-items: center; justify-content: center;
-}
-.brandbar .name { font-size: 14px; font-weight: 700; color: var(--c-ink); }
-.brandbar .tag  { font-size: 13px; font-weight: 500; color: var(--c-muted); }
 
 /* ---------- Genéricos ---------- */
-.screen { flex: 1; display: flex; flex-direction: column; min-height: 0; }
+.screen { flex: 1; display: flex; flex-direction: column; min-height: 0; position: relative; }
 .scroll { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
 .row { display: flex; align-items: center; }
 .spacer { flex: 1; }
 .hidden { display: none !important; }
 
+/* Respeita o notch/ilha do dispositivo no topo do app. */
 .safe-top { padding-top: env(safe-area-inset-top, 0); }
 
-/* status bar fake (some no mobile real, decorativa no frame) */
-.statusbar {
-  height: 14px; flex-shrink: 0;
+/* Transição de tela (cara de navegação nativa). */
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
-@media (min-width: 540px) {
-  .statusbar {
-    height: 44px;
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 0 26px; position: relative; z-index: 5;
-  }
-}
-.statusbar .clock { display: none; font-size: 14px; font-weight: 700; color: var(--c-ink); }
-.statusbar .notch { display: none; }
-@media (min-width: 540px) {
-  .statusbar .clock { display: block; }
-  .statusbar .notch {
-    display: block; position: absolute; left: 50%; top: 9px; transform: translateX(-50%);
-    width: 104px; height: 26px; background: #0B0E14; border-radius: 14px;
-  }
-}
+.screen { animation: screenIn 0.22s ease both; }
 
 /* ---------- Top bar gamificação ---------- */
 .topbar {
   flex-shrink: 0; display: flex; align-items: center; gap: 8px;
-  padding: 6px 18px 12px; border-bottom: 1px solid var(--c-line);
+  padding: calc(14px + env(safe-area-inset-top, 0)) 18px 12px;
+  border-bottom: 1px solid var(--c-line);
 }
 .topbar .flag {
   width: 30px; height: 22px; border-radius: 4px; overflow: hidden;
@@ -203,7 +188,8 @@ button { font-family: inherit; }
 
 /* ---------- Lição ---------- */
 .lesson-head {
-  flex-shrink: 0; display: flex; align-items: center; gap: 14px; padding: 6px 18px 14px;
+  flex-shrink: 0; display: flex; align-items: center; gap: 14px;
+  padding: calc(14px + env(safe-area-inset-top, 0)) 18px 14px;
 }
 .iconbtn { border: none; background: transparent; cursor: pointer; padding: 4px; display: flex; }
 .progress {
@@ -252,6 +238,7 @@ button { font-family: inherit; }
   cursor: pointer; transition: all 0.12s; background: #fff;
 }
 .opt span { font-size: 16px; font-weight: 600; color: var(--c-ink); }
+.opt:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 2px; }
 
 /* word bank / dictation */
 .answer-line {
@@ -311,7 +298,8 @@ button { font-family: inherit; }
 
 /* ---------- Perfil ---------- */
 .profile-head {
-  background: linear-gradient(135deg, #F96877, #E73B4C); padding: 24px 22px 26px;
+  background: linear-gradient(135deg, #F96877, #E73B4C);
+  padding: calc(28px + env(safe-area-inset-top, 0)) 22px 26px;
   display: flex; align-items: center; gap: 16px;
 }
 .avatar {
