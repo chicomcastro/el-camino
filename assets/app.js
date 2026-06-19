@@ -916,16 +916,30 @@
     }
     return pool;
   }
+  // Monta o desafio do dia (até 5 itens), PRIORIZANDO o que está
+  // vencido na revisão espaçada (SRS) e completando com um sorteio
+  // determinístico (estável durante o dia) do conteúdo já aprendido.
   function buildDaily() {
-    var pool = dailyPool();
-    var rng = seededRng('camino-' + todayStr());
-    // embaralha cópia
-    var arr = pool.slice();
-    for (var i = arr.length - 1; i > 0; i--) {
-      var j = Math.floor(rng() * (i + 1));
-      var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+    var TARGET = 5;
+    var picked = [];
+    var seen = [];
+    function add(ex) {
+      if (!ex || picked.length >= TARGET || seen.indexOf(ex) >= 0) return;
+      seen.push(ex); picked.push(ex);
     }
-    return arr.slice(0, Math.min(5, arr.length));
+    // 1) itens vencidos do SRS (mais atrasados primeiro)
+    srsDue().forEach(function (id) { add(EX_BY_ID[id]); });
+    // 2) completa com sorteio determinístico do que já foi aprendido
+    if (picked.length < TARGET) {
+      var arr = dailyPool().slice();
+      var rng = seededRng('camino-' + todayStr());
+      for (var i = arr.length - 1; i > 0; i--) {
+        var j = Math.floor(rng() * (i + 1));
+        var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+      }
+      for (var k = 0; k < arr.length && picked.length < TARGET; k++) add(arr[k]);
+    }
+    return picked;
   }
   function startDaily() {
     if (S.hearts <= 0) { set({ screen: 'lives', daily: true }); return; }
