@@ -75,6 +75,7 @@
       xpToday: 0,           // XP ganho hoje (meta diária)
       xpTodayDate: null,    // dia de referência do xpToday
       dailyDoneDate: null,  // dia em que o desafio diário foi concluído
+      goalMetDate: null,    // dia em que a meta diária foi atingida (p/ ofensiva)
       hearts: HEARTS_MAX,
       heartsTs: Date.now(), // momento da última perda (base p/ regenerar)
       streak: 0,
@@ -98,6 +99,7 @@
       name: S.name, onboarded: S.onboarded, dailyGoalXp: S.dailyGoalXp, soundOn: S.soundOn,
       progress: S.progress, totalXp: S.totalXp, gems: S.gems,
       xpToday: S.xpToday, xpTodayDate: S.xpTodayDate, dailyDoneDate: S.dailyDoneDate,
+      goalMetDate: S.goalMetDate,
       hearts: S.hearts, heartsTs: S.heartsTs, streak: S.streak, lastActive: S.lastActive,
       srs: S.srs,
     };
@@ -123,6 +125,7 @@
 
   // runtime (não persiste)
   S.screen = S.onboarded ? 'home' : 'onboarding';
+  S.goalJustMet = false; // meta diária acabou de ser batida? (comemoração)
   S.obStep = 0;       // passo do onboarding
   S.obGoal = S.dailyGoalXp; // seleção temporária de meta no onboarding
   S.homeLevel = null; // nível em foco na home (null = nível atual)
@@ -678,13 +681,20 @@
     html += '</div></div>';
 
     // preferências
-    var goal = GOALS.find(function (g) { return g.xp === S.dailyGoalXp; }) || GOALS[1];
-    html += '<div style="padding:0 22px 8px;"><div class="section-ttl">Preferências</div>' +
-      '<button class="pref-row" data-act="changeGoal">' +
-      '<div class="pref-ic" style="background:#FFF4E5;">' + svg(IC.star, 20, '#E8A13C') + '</div>' +
-      '<div class="pref-txt"><span class="pref-t">Meta diária</span>' +
-      '<span class="pref-s">' + goal.label + ' · ' + S.dailyGoalXp + ' XP por dia</span></div>' +
-      svg('M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z', 22, '#C2CADB') + '</button>' +
+    html += '<div style="padding:0 22px 8px;"><div class="section-ttl">Meta diária</div>';
+    html += '<div class="goal-grid">';
+    GOALS.forEach(function (g) {
+      var sel = S.dailyGoalXp === g.xp;
+      html += '<button class="goal-opt' + (sel ? ' sel' : '') + '" data-act="setGoal" data-xp="' + g.xp + '">' +
+        '<span class="go-xp">' + g.xp + ' XP</span>' +
+        '<span class="go-label">' + g.label + '</span>' +
+        '<span class="go-mins">' + g.mins + '</span>' +
+        (sel ? '<span class="go-check">' + svg(IC.checkC, 16, '#E73B4C') + '</span>' : '') +
+        '</button>';
+    });
+    html += '</div>';
+
+    html += '<div class="section-ttl" style="margin-top:18px;">Preferências</div>' +
       '<button class="pref-row" data-act="rename">' +
       '<div class="pref-ic" style="background:#E5EEFF;">' + svg(IC.account, 20, '#3C76E8') + '</div>' +
       '<div class="pref-txt"><span class="pref-t">Nome</span>' +
@@ -735,6 +745,37 @@
       var inp = document.getElementById('ob-name');
       if (inp) setTimeout(function () { try { inp.focus(); } catch (e) {} }, 60);
     }
+
+    // Comemoração ao bater a meta diária (dispara ao chegar na home).
+    if (S.screen === 'home' && S.goalJustMet) {
+      S.goalJustMet = false;
+      celebrateGoal(S.streak);
+    }
+  }
+
+  // Confete leve + toast quando a meta diária é batida.
+  function celebrateGoal(streak) {
+    SFX.win();
+    var palette = ['#E73B4C', '#3C76E8', '#9D55FF', '#1AC136', '#E8A13C'];
+    var bits = '';
+    for (var i = 0; i < 16; i++) {
+      var left = Math.round((i * 53 + 9) % 100);
+      var size = 7 + (i % 3) * 3;
+      var dur = (1.8 + (i % 4) * 0.3).toFixed(1);
+      var delay = ((i % 5) * 0.12).toFixed(2);
+      bits += '<i style="left:' + left + '%;width:' + size + 'px;height:' + size + 'px;background:' +
+        palette[i % palette.length] + ';animation-duration:' + dur + 's;animation-delay:' + delay + 's;"></i>';
+    }
+    var ov = document.createElement('div');
+    ov.className = 'celebrate';
+    ov.innerHTML = bits;
+    try {
+      root.appendChild(ov);
+      setTimeout(function () { try { root.removeChild(ov); } catch (e) {} }, 2600);
+    } catch (e) {}
+    setTimeout(function () {
+      toast(svg(IC.flame, 16, '#FFB259') + 'Meta diária batida! Ofensiva de ' + streak + (streak === 1 ? ' dia' : ' dias') + ' 🔥');
+    }, 300);
   }
 
   var toastTimer = null;
@@ -953,12 +994,16 @@
     }
   }
   function todayStr() { return new Date().toISOString().slice(0, 10); }
-  function bumpStreak() {
-    var today = todayStr();
-    if (S.lastActive === today) return;
-    var yest = new Date(Date.now() - 86400000).toISOString().slice(0, 10);
-    S.streak = (S.lastActive === yest) ? S.streak + 1 : 1;
-    S.lastActive = today;
+  function yesterdayStr() { return new Date(Date.now() - 86400000).toISOString().slice(0, 10); }
+  // A ofensiva avança quando a META DIÁRIA é atingida (1x por dia).
+  function creditGoalIfMet() {
+    ensureDaily();
+    if (S.xpToday >= S.dailyGoalXp && S.goalMetDate !== todayStr()) {
+      S.streak = (S.goalMetDate === yesterdayStr()) ? S.streak + 1 : 1;
+      S.goalMetDate = todayStr();
+      S.lastActive = todayStr();
+      S.goalJustMet = true; // dispara a comemoração na home
+    }
   }
   // Zera o XP do dia quando vira o dia.
   function ensureDaily() {
@@ -970,6 +1015,7 @@
     S.totalXp += xp;
     S.xpToday += xp;
     S.gems += (gems || 0);
+    S.lastActive = todayStr();
   }
   function finishLesson() {
     var completedLevel = -1;
@@ -977,7 +1023,7 @@
       // desafio diário: recompensa, marca o dia, sem mexer no progresso
       awardXp(S.gainedXp, S.gainedGems);
       S.dailyDoneDate = todayStr();
-      bumpStreak();
+      creditGoalIfMet();
       S.daily = false;
       set({ screen: 'home', homeLevel: null });
       setTimeout(function () { toast(svg(IC.flame, 16, '#FFB259') + 'Desafio do dia concluído! +' + S.gainedGems + ' 💎'); }, 350);
@@ -986,6 +1032,7 @@
     if (S.review) {
       // revisão espaçada: recompensa leve, sem mexer no progresso
       awardXp(S.gainedXp, S.gainedGems);
+      creditGoalIfMet();
       S.review = false;
       set({ screen: 'home', homeLevel: null });
       setTimeout(function () { toast(svg(IC.checkC, 16, '#1AC136') + 'Revisão concluída! Memória reforçada 🧠'); }, 350);
@@ -998,7 +1045,7 @@
       if (node && S.progress >= LEVEL_BOUNDS[node.levelIdx].end) completedLevel = node.levelIdx;
     }
     awardXp(S.gainedXp, S.gainedGems);
-    bumpStreak();
+    creditGoalIfMet();
     S.homeLevel = null;
     if (completedLevel >= 0) {
       SFX.levelup();
@@ -1030,11 +1077,14 @@
         set({ onboarded: true, dailyGoalXp: S.obGoal, screen: 'home', obStep: 0 });
         setTimeout(function () { toast('¡Vamos, ' + esc(S.name) + '! Sua trilha começa aqui 🚀'); }, 350);
         break;
-      case 'changeGoal': {
-        var idx = GOALS.findIndex(function (g) { return g.xp === S.dailyGoalXp; });
-        var nextGoal = GOALS[(idx + 1) % GOALS.length];
-        set({ dailyGoalXp: nextGoal.xp });
-        toast('Meta diária: ' + nextGoal.xp + ' XP/dia');
+      case 'setGoal': {
+        var xp = parseInt(t.getAttribute('data-xp'), 10);
+        if (xp === S.dailyGoalXp) break;
+        S.dailyGoalXp = xp;
+        // se o XP de hoje já alcança a nova meta, credita a ofensiva
+        creditGoalIfMet();
+        set({});
+        toast('Meta diária: ' + xp + ' XP/dia');
         break;
       }
       case 'start': startLesson(parseInt(t.getAttribute('data-gi'), 10)); break;
