@@ -63,6 +63,7 @@ window.CAMINO_DATA = {
               words: ['Hola', 'buenos', 'días', 'noches', 'gracias'], solution: ['Hola', 'buenos', 'días'] },
             { type: 'mcq', prompt: 'Como se diz "por favor"?',
               options: ['Por favor', 'De nada', 'Lo siento', 'Hasta luego'], correct: 0 },
+            { type: 'speak', prompt: 'Fale em voz alta', es: '¡Buenos días!', pt: 'Bom dia!' },
           ] },
           { id: 'ini-m1-l2', title: 'Sim, não, desculpe', icon: 'chat', exercises: [
             { type: 'mcq', prompt: 'O que significa "sí"?',
@@ -113,6 +114,7 @@ window.CAMINO_DATA = {
               words: ['Me', 'llamo', 'Lucas', 'soy', 'gusto'], solution: ['Me', 'llamo', 'Lucas'] },
             { type: 'mcq', prompt: 'Como se diz "Eu sou do Brasil"?',
               options: ['Soy de Brasil', 'Eres de Brasil', 'Vivo aquí', 'Me gusta Brasil'], correct: 0 },
+            { type: 'speak', prompt: 'Fale em voz alta', es: 'Mucho gusto, me llamo Lucas', pt: 'Muito prazer, meu nome é Lucas' },
           ] },
           { id: 'bas-m1-l2', title: 'Bate-papo', icon: 'chat', exercises: [
             { type: 'mcq', prompt: 'O que significa?', bubblePt: '¿De dónde eres?',
@@ -163,6 +165,7 @@ window.CAMINO_DATA = {
               options: ['el amor de Dios', 'la fe de Dios', 'la paz de Dios', 'el hijo de Dios'], correct: 0 },
             { type: 'listen', prompt: 'Toque no que você ouve', audioEs: 'Jesús te ama', dictation: true,
               words: ['Jesús', 'te', 'ama', 'Dios'], solution: ['Jesús', 'te', 'ama'] },
+            { type: 'speak', prompt: 'Fale em voz alta', es: 'Dios te ama', pt: 'Deus te ama' },
           ] },
           { id: 'int1-m1-l2', title: 'O convite', icon: 'cross', exercises: [
             { type: 'listen', prompt: 'Toque no que você ouve', audioEs: '¿Puedo orar por ti?', dictation: true,
