@@ -55,6 +55,7 @@
       name: 'Lucas',
       onboarded: false,     // já passou pelo onboarding?
       dailyGoalXp: 50,      // meta diária de XP
+      soundOn: true,        // efeitos sonoros de feedback
       progress: 0,          // nº de lições concluídas (índice da lição atual)
       totalXp: 0,
       gems: 0,              // gemas (moeda) p/ recuperar vidas
@@ -80,7 +81,7 @@
   }
   function persist() {
     var p = {
-      name: S.name, onboarded: S.onboarded, dailyGoalXp: S.dailyGoalXp,
+      name: S.name, onboarded: S.onboarded, dailyGoalXp: S.dailyGoalXp, soundOn: S.soundOn,
       progress: S.progress, totalXp: S.totalXp, gems: S.gems,
       xpToday: S.xpToday, xpTodayDate: S.xpTodayDate, dailyDoneDate: S.dailyDoneDate,
       hearts: S.hearts, heartsTs: S.heartsTs, streak: S.streak, lastActive: S.lastActive,
@@ -666,6 +667,15 @@
       '<div class="pref-txt"><span class="pref-t">Nome</span>' +
       '<span class="pref-s">' + esc(name) + '</span></div>' +
       svg('M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z', 22, '#C2CADB') + '</button>' +
+      '<button class="pref-row" data-act="toggleSound">' +
+      '<div class="pref-ic" style="background:' + (S.soundOn ? '#F5F0FF' : '#F0F3FA') + ';">' +
+      svg(S.soundOn
+        ? 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z'
+        : 'M12,4L9.91,6.09L12,8.18M4.27,3L3,4.27L7.73,9H3V15H7L12,20V13.27L16.25,17.53C15.58,18.04 14.83,18.46 14,18.7V20.77C15.38,20.45 16.63,19.82 17.68,18.96L19.73,21L21,19.73L12,10.73M19,12C19,12.94 18.8,13.82 18.46,14.64L19.97,16.15C20.62,14.91 21,13.5 21,12C21,7.72 18,4.14 14,3.23V5.29C16.89,6.15 19,8.83 19,12Z',
+        20, S.soundOn ? '#9D55FF' : '#9CA5B8') + '</div>' +
+      '<div class="pref-txt"><span class="pref-t">Som</span>' +
+      '<span class="pref-s">' + (S.soundOn ? 'Efeitos sonoros ligados' : 'Efeitos sonoros desligados') + '</span></div>' +
+      '<div class="toggle' + (S.soundOn ? ' on' : '') + '"><i></i></div></button>' +
       '</div>';
 
     html += '<button class="reset-btn" data-act="reset">Reiniciar progresso</button>';
@@ -733,6 +743,52 @@
       synth.speak(u);
     } catch (e) {}
   }
+
+  // ===========================================================
+  //  Efeitos sonoros (WebAudio, sintetizados — sem arquivos)
+  // ===========================================================
+  var _actx = null;
+  function audioCtx() {
+    try {
+      if (!_actx) {
+        var AC = window.AudioContext || window.webkitAudioContext;
+        if (!AC) return null;
+        _actx = new AC();
+      }
+      if (_actx.state === 'suspended' && _actx.resume) _actx.resume();
+      return _actx;
+    } catch (e) { return null; }
+  }
+  // Toca uma sequência de notas: [{f, t, d, type, g}]
+  function playSeq(notes) {
+    if (!S.soundOn) return;
+    var ctx = audioCtx();
+    if (!ctx) return;
+    var t0 = ctx.currentTime;
+    notes.forEach(function (n) {
+      try {
+        var osc = ctx.createOscillator();
+        var gain = ctx.createGain();
+        osc.type = n.type || 'sine';
+        osc.frequency.value = n.f;
+        var start = t0 + (n.t || 0);
+        var dur = n.d || 0.12;
+        var peak = n.g || 0.16;
+        gain.gain.setValueAtTime(0.0001, start);
+        gain.gain.exponentialRampToValueAtTime(peak, start + 0.012);
+        gain.gain.exponentialRampToValueAtTime(0.0001, start + dur);
+        osc.connect(gain); gain.connect(ctx.destination);
+        osc.start(start); osc.stop(start + dur + 0.02);
+      } catch (e) {}
+    });
+  }
+  var SFX = {
+    correct: function () { playSeq([{ f: 659.25, t: 0, d: 0.12 }, { f: 987.77, t: 0.1, d: 0.18 }]); },       // E5→B5
+    wrong:   function () { playSeq([{ f: 196, t: 0, d: 0.22, type: 'sawtooth', g: 0.12 }, { f: 155.56, t: 0.08, d: 0.26, type: 'sawtooth', g: 0.12 }]); },
+    win:     function () { playSeq([{ f: 523.25, t: 0, d: 0.13 }, { f: 659.25, t: 0.12, d: 0.13 }, { f: 783.99, t: 0.24, d: 0.13 }, { f: 1046.5, t: 0.36, d: 0.3 }]); }, // C-E-G-C
+    levelup: function () { playSeq([{ f: 523.25, t: 0, d: 0.12 }, { f: 659.25, t: 0.1, d: 0.12 }, { f: 783.99, t: 0.2, d: 0.12 }, { f: 1046.5, t: 0.3, d: 0.14 }, { f: 1318.5, t: 0.44, d: 0.34 }]); },
+    tap:     function () { playSeq([{ f: 330, t: 0, d: 0.06, g: 0.08 }]); },
+  };
 
   // ===========================================================
   //  Ações da lição
@@ -810,8 +866,8 @@
     else ok = S.answer.map(function (a) { return a.w; }).join(' ') === ex.solution.join(' ');
     S.checked = true;
     S.lastOk = ok;
-    if (ok) S.correct += 1;
-    else { S.hearts = Math.max(0, S.hearts - 1); if (S.hearts === HEARTS_MAX - 1) S.heartsTs = Date.now(); }
+    if (ok) { S.correct += 1; SFX.correct(); }
+    else { S.hearts = Math.max(0, S.hearts - 1); if (S.hearts === HEARTS_MAX - 1) S.heartsTs = Date.now(); SFX.wrong(); }
     persist();
     render();
   }
@@ -828,6 +884,7 @@
         gained = 15 + S.correct * 5;
         gems = 3 + S.correct;
       }
+      SFX.win();
       set({ screen: 'complete', gainedXp: gained, gainedGems: gems });
     } else {
       initEx(S.exIndex + 1);
@@ -874,6 +931,7 @@
     bumpStreak();
     S.homeLevel = null;
     if (completedLevel >= 0) {
+      SFX.levelup();
       set({ screen: 'levelup', levelUpIdx: completedLevel });
     } else {
       set({ screen: 'home' });
@@ -957,6 +1015,13 @@
         toast('Vidas recuperadas! 💖');
         break;
       case 'startDaily': startDaily(); break;
+      case 'toggleSound': {
+        var on = !S.soundOn;
+        S.soundOn = on; // define antes para o SFX respeitar o novo estado
+        set({ soundOn: on });
+        if (on) SFX.correct();
+        break;
+      }
       case 'speak': speak(curEx().audioEs); break;
       case 'speakSlow': speak(curEx().audioEs, 0.55); break;
       case 'rename': {
