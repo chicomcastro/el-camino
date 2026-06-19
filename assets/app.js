@@ -724,8 +724,18 @@
   // ===========================================================
   var root = document.getElementById('app');
 
+  // Preserva a posição de scroll entre re-renders da MESMA tela
+  // (evita "voltar ao topo" ao trocar de nível, escolher meta, etc.).
+  var _scrollByScreen = {};
+  var _lastScreenKey = null;
+
   function render() {
     ensureDaily();
+
+    // salva o scroll atual antes de recriar o DOM
+    var prevScroll = root.querySelector('.scroll');
+    if (prevScroll && _lastScreenKey != null) _scrollByScreen[_lastScreenKey] = prevScroll.scrollTop;
+
     var body;
     switch (S.screen) {
       case 'onboarding': body = viewOnboarding(); break;
@@ -739,6 +749,11 @@
     }
     root.innerHTML = '<div class="screen" data-screen="' + S.screen + '">' + body + '</div>' +
       '<div class="toast" id="toast"></div>';
+
+    // restaura o scroll se continuamos na mesma tela; senão, começa no topo
+    var sc = root.querySelector('.scroll');
+    if (sc) sc.scrollTop = (S.screen === _lastScreenKey) ? (_scrollByScreen[S.screen] || 0) : 0;
+    _lastScreenKey = S.screen;
 
     // Foco no campo de nome do onboarding.
     if (S.screen === 'onboarding' && S.obStep === 1) {
