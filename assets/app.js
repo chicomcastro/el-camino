@@ -31,6 +31,19 @@
   });
   var TOTAL_LESSONS = TRAIL.length;
 
+  // ---- índices de exercícios (para a revisão espaçada / SRS) ----
+  // exId estável = "<lessonId>#<idx>". Como os objetos de exercício são
+  // referências compartilhadas, dá para mapear objeto → id e id → objeto.
+  var EX_ID_OF = new Map();
+  var EX_BY_ID = {};
+  TRAIL.forEach(function (t) {
+    t.lesson.exercises.forEach(function (ex, i) {
+      var id = t.lesson.id + '#' + i;
+      EX_ID_OF.set(ex, id);
+      EX_BY_ID[id] = ex;
+    });
+  });
+
   // Faixa [início, fim) de lições de cada nível e seu tamanho.
   var LEVEL_BOUNDS = DATA.levels.map(function (lv, i) {
     var idxs = TRAIL.filter(function (t) { return t.levelIdx === i; });
@@ -66,6 +79,7 @@
       heartsTs: Date.now(), // momento da última perda (base p/ regenerar)
       streak: 0,
       lastActive: null,     // 'YYYY-MM-DD'
+      srs: {},              // revisão espaçada: { exId: { box, due } }
     };
   }
 
@@ -85,6 +99,7 @@
       progress: S.progress, totalXp: S.totalXp, gems: S.gems,
       xpToday: S.xpToday, xpTodayDate: S.xpTodayDate, dailyDoneDate: S.dailyDoneDate,
       hearts: S.hearts, heartsTs: S.heartsTs, streak: S.streak, lastActive: S.lastActive,
+      srs: S.srs,
     };
     try { localStorage.setItem(STORE_KEY, JSON.stringify(p)); } catch (e) {}
   }
@@ -114,6 +129,7 @@
   S.levelUpIdx = 0;   // nível recém-concluído (tela de level-up)
   S.cur = null;       // índice global da lição em curso (-1 = desafio diário)
   S.daily = false;    // estamos no desafio diário?
+  S.review = false;   // estamos numa sessão de revisão espaçada?
   S.activeExercises = []; // exercícios da sessão em curso
   S.exIndex = 0;
   S.selected = null;
@@ -291,6 +307,14 @@
       html += '<button class="daily" data-act="startDaily"><div class="d-ic" style="background:#FFF1E0;">' + svg(IC.flame, 22, '#E8730C') + '</div>' +
         '<div class="d-mid"><div class="d-t">Desafio do dia</div><div class="d-s">Revisão rápida · bônus de XP e 💎</div></div>' +
         svg('M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z', 22, '#E8A13C') + '</button>';
+    }
+
+    // revisão espaçada: aparece só quando há itens vencidos
+    var due = srsDue().length;
+    if (due > 0) {
+      html += '<button class="daily" data-act="startReview" style="margin-bottom:8px;"><div class="d-ic" style="background:#E5F0FF;">' + svg(IC.book, 22, '#3C76E8') + '</div>' +
+        '<div class="d-mid"><div class="d-t">Revisão</div><div class="d-s">' + due + ' ' + (due === 1 ? 'item para revisar' : 'itens para revisar') + ' · fixe o que aprendeu</div></div>' +
+        svg('M8.59,16.58L13.17,12L8.59,7.41L10,6L16,12L10,18L8.59,16.58Z', 22, '#3C76E8') + '</button>';
     }
     return html;
   }
@@ -563,7 +587,7 @@
     html += '</div>';
 
     html += '<div class="center"><div class="pop">' + mascot(132, 'happy') + '</div>' +
-      '<h1>' + (S.daily ? '¡Desafío completado!' : '¡Lección completada!') + '</h1>' +
+      '<h1>' + (S.daily ? '¡Desafío completado!' : (S.review ? '¡Repaso completado!' : '¡Lección completada!')) + '</h1>' +
       '<div class="sub">Você acertou ' + S.correct + ' de ' + len + ' · siga firme na missão!</div>' +
       '<div class="stat-cards">' +
       '<div class="stat-card" style="border-color:#FFE8C9;"><div class="cap" style="background:#E8A13C;">XP GANHO</div>' +
@@ -806,7 +830,7 @@
     if (S.hearts <= 0) { S.screen = 'lives'; S.cur = gi; S.daily = false; render(); return; }
     var exs = TRAIL[gi].lesson.exercises;
     Object.assign(S, {
-      screen: 'lesson', cur: gi, daily: false, activeExercises: exs, correct: 0, exIndex: 0,
+      screen: 'lesson', cur: gi, daily: false, review: false, activeExercises: exs, correct: 0, exIndex: 0,
       selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [],
     });
     render();
@@ -853,12 +877,47 @@
     var exs = buildDaily();
     if (!exs.length) { toast('Conclua uma lição para liberar o desafio'); return; }
     Object.assign(S, {
-      screen: 'lesson', cur: -1, daily: true, activeExercises: exs, correct: 0, exIndex: 0,
+      screen: 'lesson', cur: -1, daily: true, review: false, activeExercises: exs, correct: 0, exIndex: 0,
       selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [],
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs);
   }
+
+  // ---- Revisão espaçada (Leitner) ----
+  // Intervalos por caixa (ms). Caixa 0 = volta logo; sobe a cada acerto.
+  var SRS_INTERVALS = [10 * 60e3, 24 * 3600e3, 3 * 24 * 3600e3, 7 * 24 * 3600e3, 16 * 24 * 3600e3, 35 * 24 * 3600e3];
+  function srsRecord(exId, ok) {
+    if (!exId) return;
+    var it = S.srs[exId] || { box: 0, due: 0 };
+    it.box = ok ? Math.min(SRS_INTERVALS.length - 1, it.box + 1) : 0;
+    it.due = Date.now() + SRS_INTERVALS[it.box];
+    S.srs[exId] = it;
+  }
+  // Itens vencidos (já vistos e na hora de revisar).
+  function srsDue() {
+    var now = Date.now();
+    var ids = [];
+    for (var id in S.srs) {
+      if (Object.prototype.hasOwnProperty.call(S.srs, id) && EX_BY_ID[id] && S.srs[id].due <= now) ids.push(id);
+    }
+    // mais atrasados primeiro
+    ids.sort(function (a, b) { return S.srs[a].due - S.srs[b].due; });
+    return ids;
+  }
+  function startReview() {
+    if (S.hearts <= 0) { set({ screen: 'lives', review: true }); return; }
+    var ids = srsDue().slice(0, 10);
+    var exs = ids.map(function (id) { return EX_BY_ID[id]; });
+    if (!exs.length) { toast('Nada para revisar agora 🙌'); return; }
+    Object.assign(S, {
+      screen: 'lesson', cur: -2, daily: false, review: true, activeExercises: exs, correct: 0, exIndex: 0,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [],
+    });
+    render();
+    if (exs[0].audioEs) speak(exs[0].audioEs);
+  }
+
   function verify() {
     var ex = curEx();
     var ok;
@@ -868,6 +927,7 @@
     S.lastOk = ok;
     if (ok) { S.correct += 1; SFX.correct(); }
     else { S.hearts = Math.max(0, S.hearts - 1); if (S.hearts === HEARTS_MAX - 1) S.heartsTs = Date.now(); SFX.wrong(); }
+    srsRecord(EX_ID_OF.get(ex), ok); // agenda a revisão espaçada deste item
     persist();
     render();
   }
@@ -880,6 +940,9 @@
         // desafio diário: bônus generoso (precisão pesa) + gemas extras
         gained = 30 + S.correct * 6;
         gems = 15;
+      } else if (S.review) {
+        gained = 10 + S.correct * 3;
+        gems = 5;
       } else {
         gained = 15 + S.correct * 5;
         gems = 3 + S.correct;
@@ -919,6 +982,14 @@
       S.daily = false;
       set({ screen: 'home', homeLevel: null });
       setTimeout(function () { toast(svg(IC.flame, 16, '#FFB259') + 'Desafio do dia concluído! +' + S.gainedGems + ' 💎'); }, 350);
+      return;
+    }
+    if (S.review) {
+      // revisão espaçada: recompensa leve, sem mexer no progresso
+      awardXp(S.gainedXp, S.gainedGems);
+      S.review = false;
+      set({ screen: 'home', homeLevel: null });
+      setTimeout(function () { toast(svg(IC.checkC, 16, '#1AC136') + 'Revisão concluída! Memória reforçada 🧠'); }, 350);
       return;
     }
     // conclui a lição em curso, se ainda não estava concluída
@@ -983,7 +1054,7 @@
         break;
       }
       case 'finishLevelUp': set({ screen: 'home', homeLevel: null }); break;
-      case 'close': set({ screen: 'home', homeLevel: null }); break;
+      case 'close': set({ screen: 'home', homeLevel: null, daily: false, review: false }); break;
       case 'select':
         if (!S.checked) set({ selected: parseInt(t.getAttribute('data-i'), 10) });
         break;
@@ -1015,6 +1086,7 @@
         toast('Vidas recuperadas! 💖');
         break;
       case 'startDaily': startDaily(); break;
+      case 'startReview': startReview(); break;
       case 'toggleSound': {
         var on = !S.soundOn;
         S.soundOn = on; // define antes para o SFX respeitar o novo estado
