@@ -330,13 +330,12 @@
     var html = topbar();
     html += '<div class="scroll" style="padding:16px 18px 28px;">';
 
-    // saudação + bloco "hoje" (só no nível atual)
-    if (li === maxLevel) {
-      html += '<div class="greet"><div class="mascot">' + mascot(56, 'happy') + '</div>' +
-        '<div style="flex:1;"><div class="t1">¡Hola, ' + esc(S.name) + '!</div>' +
-        '<div class="t2">Pronto para a missão de hoje?</div></div></div>';
-      html += todayCard();
-    }
+    // saudação + bloco "hoje": sempre presentes (status do dia, não do nível),
+    // mantendo o topo estável ao navegar entre níveis — evita content shift.
+    html += '<div class="greet"><div class="mascot">' + mascot(56, 'happy') + '</div>' +
+      '<div style="flex:1;"><div class="t1">¡Hola, ' + esc(S.name) + '!</div>' +
+      '<div class="t2">Pronto para a missão de hoje?</div></div></div>';
+    html += todayCard();
 
     // banner do nível (com navegação entre níveis desbloqueados)
     var pct = b.size ? Math.round((doneInLevel / b.size) * 100) : 0;
