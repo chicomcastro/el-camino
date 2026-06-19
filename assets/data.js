@@ -144,6 +144,24 @@ window.CAMINO_DATA = {
             { type: 'bank', prompt: 'Monte a pergunta em espanhol', bubblePt: 'Você fala espanhol?',
               words: ['¿Hablas', 'español?', 'portugués', 'inglés'], solution: ['¿Hablas', 'español?'] },
           ] },
+          { id: 'bas-m1-l3', title: 'Tú e usted', icon: 'account',
+            teach: [
+              { es: 'tú', pt: 'você (informal) — amigos, crianças, jovens' },
+              { es: 'usted', pt: 'você (formal) — estranhos, idosos, respeito' },
+              { es: '¿Cómo se llama usted?', pt: 'Como o(a) senhor(a) se chama? (formal)' },
+              { es: '¿Cómo está usted?', pt: 'Como o(a) senhor(a) está? (formal)' },
+            ],
+            exercises: [
+              { type: 'mcq', prompt: 'Com um estranho ou uma pessoa idosa, o mais respeitoso é usar…',
+                options: ['usted', 'tú', 'vos', 'ellos'], correct: 0 },
+              { type: 'mcq', prompt: 'Qual é a forma FORMAL de "¿Cómo estás?"',
+                options: ['¿Cómo está usted?', '¿Cómo estás tú?', '¿Qué tal, amigo?', '¿Cómo van ustedes?'], correct: 0 },
+              { type: 'bank', prompt: 'Monte a pergunta formal em espanhol', bubblePt: 'Como o senhor se chama? (formal)',
+                words: ['¿Cómo', 'se', 'llama', 'usted?', 'te', 'llamas'], solution: ['¿Cómo', 'se', 'llama', 'usted?'] },
+              { type: 'mcq', prompt: 'O que significa?', bubblePt: '¿De dónde es usted?',
+                options: ['De onde o(a) senhor(a) é? (formal)', 'De onde você é? (informal)', 'Para onde o senhor vai?', 'Onde o senhor mora?'], correct: 0 },
+              { type: 'speak', prompt: 'Fale em voz alta (formal)', es: '¿Cómo está usted?', pt: 'Como o(a) senhor(a) está?' },
+            ] },
         ]),
         m('bas-m2', 'Na cidade', 'viagem', 'map', [
           { id: 'bas-m2-l1', title: 'Direções', icon: 'map', exercises: [
