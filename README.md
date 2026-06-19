@@ -35,6 +35,10 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   (por nível, lições, ofensiva e XP).
 - **Sons de feedback** — efeitos sonoros sintetizados (WebAudio, sem arquivos)
   para acerto, erro, conclusão e subida de nível; com botão de mudo no perfil.
+- **Revisão espaçada (SRS)** — cada exercício respondido entra num sistema de
+  caixas (Leitner): acertos aumentam o intervalo, erros reaproximam. Quando há
+  itens "vencidos", a home oferece uma sessão de revisão que reapresenta o que
+  você aprendeu, reforçando a memória de longo prazo.
 - **Progresso persistente** — XP, lições concluídas, vidas e ofensiva ficam salvos
   no `localStorage` do dispositivo.
 - **Instalável (PWA)** — pode ser adicionado à tela inicial do celular.
