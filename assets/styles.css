@@ -318,6 +318,23 @@ a { touch-action: manipulation; }
 }
 .chip:active { transform: translateY(2px); }
 
+/* cloze (preencher a lacuna) */
+.cloze-sentence { font-size: 21px; font-weight: 700; color: var(--c-ink); line-height: 1.5; margin-bottom: 8px; text-wrap: pretty; }
+.cloze-blank { display: inline-block; min-width: 64px; text-align: center; border-bottom: 3px solid #CFD6E5;
+  color: var(--c-muted); font-weight: 800; padding: 0 6px; }
+.cloze-blank.filled { color: var(--c-purple); border-bottom-color: var(--c-purple); }
+.cloze-hint { font-size: 13.5px; font-weight: 600; color: var(--c-muted); margin-bottom: 20px; }
+
+/* pareamento (match) */
+.match { display: flex; gap: 12px; }
+.match-col { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+.match-chip { width: 100%; background: #fff; border: 2px solid #CFD6E5; border-bottom-width: 4px;
+  border-radius: 14px; padding: 14px 12px; font-size: 15px; font-weight: 600; color: var(--c-ink);
+  cursor: pointer; transition: transform 0.08s, border-color 0.12s, background 0.12s; }
+.match-chip:active:not(:disabled) { transform: translateY(2px); }
+.match-chip.sel { border-color: var(--c-purple); background: #F5F0FF; color: #5C19B1; }
+.match-chip.matched { border-color: #1AC136; background: #E7FEEA; color: #0B8C21; opacity: 0.85; cursor: default; }
+
 /* exercício de fala (speak) */
 .speak { display: flex; flex-direction: column; align-items: center; gap: 12px; }
 .speak-phrase { display: flex; align-items: center; gap: 14px; width: 100%; background: #F5F0FF;

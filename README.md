@@ -23,11 +23,12 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   auréola, um aceno ao Espírito Santo). Dá para navegar entre níveis já abertos.
   Lições **concluídas podem ser refeitas** (tocar no nó) como revisão — rende XP
   reduzido, alimenta a revisão espaçada e não altera o progresso.
-- **Lição** — exercícios funcionais: múltipla escolha com áudio, "monte a frase"
-  (banco de palavras), ditado ("toque no que você ouve") e **fala** (pronúncia:
-  fale a frase e o app reconhece a voz), com barra de progresso, feedback de
-  acerto/erro e voz em espanhol (Web Speech API). O exercício de fala não tira
-  vidas e tem alternativa (auto-avaliação) onde o navegador não reconhece voz.
+- **Lição** — variedade de exercícios: múltipla escolha com áudio, "monte a frase"
+  (banco de palavras), ditado ("toque no que você ouve"), **preencher a lacuna**
+  (cloze), **pareamento** (relacionar colunas ES↔PT) e **fala** (pronúncia: fale a
+  frase e o app reconhece a voz), com barra de progresso, feedback de acerto/erro
+  e voz em espanhol (Web Speech API). O exercício de fala não tira vidas e tem
+  alternativa (auto-avaliação) onde o navegador não reconhece voz.
 - **Desafio do dia** — uma revisão rápida diária que **prioriza os itens vencidos
   da revisão espaçada (SRS)** e completa com exercícios sorteados do que já foi
   aprendido (estáveis durante o dia); dá bônus de XP e gemas.
