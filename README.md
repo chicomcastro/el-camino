@@ -48,6 +48,10 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   resposta a cada turno), renderizada como um chat com balões, áudio das falas e
   feedback turno a turno. Cobre primeiro contato, resposta a objeções com respeito
   e convite para a reunião — treino direto da missão.
+- **Diálogos de viagem** — o mesmo formato de chat aplicado às situações clássicas
+  da viagem: cafeteria, táxi até o hotel (Básico); check-in no aeroporto, check-in
+  no hotel, pedido no restaurante (Intermediário 1); imigração e lanche a bordo
+  (Intermediário 2). As falas vêm com tradução para facilitar nos níveis iniciais.
 - **Kit de campo** — módulo prático para o missionário montar a própria fala:
   estrutura do testemunho pessoal (antes → encontro → agora) e respostas
   respeitosas às objeções mais comuns ("não tenho tempo", "há muitas religiões",
