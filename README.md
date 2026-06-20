@@ -52,6 +52,10 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   da viagem: cafeteria, táxi até o hotel (Básico); check-in no aeroporto, check-in
   no hotel, pedido no restaurante (Intermediário 1); imigração e lanche a bordo
   (Intermediário 2). As falas vêm com tradução para facilitar nos níveis iniciais.
+- **Diálogos de abordagem** — conversas de evangelização progressivas: uma primeira
+  conversa simples já no Básico e, no Intermediário 1, abordagens adaptadas ao
+  interlocutor — um jovem (linguagem próxima) e uma pessoa idosa (tratamento formal
+  com "usted"), sempre com respeito.
 - **Kit de campo** — módulo prático para o missionário montar a própria fala:
   estrutura do testemunho pessoal (antes → encontro → agora) e respostas
   respeitosas às objeções mais comuns ("não tenho tempo", "há muitas religiões",
