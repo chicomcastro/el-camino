@@ -939,15 +939,19 @@ window.CAMINO_DATA = {
               { es: '¿Puedo contarte algo?', pt: 'Posso te contar algo?' },
             ],
             exercises: [
+              // Ramificado: você escolhe a mensagem (o amor/plano de Deus ou seu
+              // testemunho) e a pessoa reage conforme a escolha; reconverge no convite.
               { type: 'dialog', prompt: 'Converse com um estranho na rua', persona: 'Pessoa na rua',
                 turns: [
                   { npc: 'Hola, ¿qué hacen ustedes por aquí?', npcPt: 'Olá, o que vocês fazem por aqui?',
-                    options: ['Somos misioneros y compartimos un mensaje de esperanza.', 'Estamos vendiendo libros baratos.', 'Buscamos un restaurante.'], correct: 0 },
+                    options: ['Somos misioneros y compartimos un mensaje de esperanza.', 'Somos misioneros y queremos servir a la gente.', 'Buscamos un restaurante.'], correct: 0, accept: [0, 1] },
                   { npc: '¿Un mensaje de esperanza? No tengo mucho tiempo.', npcPt: 'Uma mensagem de esperança? Não tenho muito tempo.',
                     options: ['Solo unos minutos. ¿Puedo contarte algo que cambió mi vida?', 'Entonces no importa, adiós.', 'Tienes que escucharme ahora.'], correct: 0 },
                   { npc: 'Está bien, dime. ¿De qué se trata?', npcPt: 'Tudo bem, me diga. Do que se trata?',
-                    options: ['Dios te ama y tiene un plan para tu vida.', 'Necesito dinero para el viaje.', '¿Dónde está la estación?'], correct: 0 },
-                  { npc: 'Nunca pensé en eso. ¿Cómo puedo saber más?', npcPt: 'Nunca pensei nisso. Como posso saber mais?',
+                    options: ['Dios te ama y tiene un plan para tu vida.', 'Jesús cambió mi vida por completo.', 'Necesito dinero para el viaje.'], correct: 0, accept: [0, 1], branches: { 0: 3, 1: 4 } },
+                  { npc: 'Un plan para mí... me cuesta creerlo.', npcPt: 'Um plano para mim... custo a acreditar.',
+                    options: ['Podemos leer la Biblia juntos. ¿Te gustaría?', 'No sé, busca en internet.', 'Olvídalo, no es importante.'], correct: 0, branches: { 0: 5 } },
+                  { npc: 'Si a ti te cambió, quiero saber más.', npcPt: 'Se mudou você, quero saber mais.',
                     options: ['Podemos leer la Biblia juntos. ¿Te gustaría?', 'No sé, busca en internet.', 'Olvídalo, no es importante.'], correct: 0 },
                   { npc: 'Me gustaría mucho. Gracias por hablar conmigo.', npcPt: 'Eu gostaria muito. Obrigado por falar comigo.',
                     options: ['Que Dios te bendiga. Nos vemos pronto.', 'Adiós para siempre.', 'No vuelvas más.'], correct: 0 },
@@ -965,15 +969,19 @@ window.CAMINO_DATA = {
               { es: 'encontré paz', pt: 'encontrei paz' },
             ],
             exercises: [
+              // Ramificado: diante do sofrimento, você pode falar da força que a fé dá
+              // ou da própria experiência de não estar só; os caminhos se reencontram.
               { type: 'dialog', prompt: 'Responda com respeito a quem duvida', persona: 'Pessoa cética',
                 turns: [
                   { npc: 'Yo no creo en Dios. ¿Por qué debería escucharte?', npcPt: 'Eu não acredito em Deus. Por que eu deveria te ouvir?',
-                    options: ['Respeto lo que piensas. ¿Puedo contarte mi experiencia?', 'Estás equivocado, debes creer.', 'Entonces no sirve hablar contigo.'], correct: 0 },
+                    options: ['Respeto lo que piensas. ¿Puedo contarte mi experiencia?', 'Respeto tu opinión. Solo te pido unos minutos.', 'Entonces no sirve hablar contigo.'], correct: 0, accept: [0, 1] },
                   { npc: 'Está bien, te escucho. Pero hay mucho sufrimiento en el mundo.', npcPt: 'Tudo bem, te escuto. Mas há muito sofrimento no mundo.',
-                    options: ['Es verdad, y la fe me da fuerza en los momentos difíciles.', 'El sufrimiento no existe.', 'No quiero hablar de eso.'], correct: 0 },
-                  { npc: '¿La fe te ayudó de verdad?', npcPt: 'A fé te ajudou de verdade?',
-                    options: ['Sí, encontré paz y un propósito para mi vida.', 'No, en realidad no.', 'No lo sé, nunca lo pensé.'], correct: 0 },
-                  { npc: 'Quizás yo también necesito algo de paz.', npcPt: 'Talvez eu também precise de um pouco de paz.',
+                    options: ['Es verdad, y la fe me da fuerza en los momentos difíciles.', 'Es verdad, yo también sufrí y no estuve solo.', 'El sufrimiento no existe.'], correct: 0, accept: [0, 1], branches: { 0: 2, 1: 3 } },
+                  { npc: '¿La fe te da fuerza de verdad?', npcPt: 'A fé te dá força de verdade?',
+                    options: ['Sí, encontré paz y un propósito para mi vida.', 'No, en realidad no.', 'No lo sé, nunca lo pensé.'], correct: 0, branches: { 0: 4 } },
+                  { npc: '¿No estuviste solo? ¿Cómo así?', npcPt: 'Você não esteve só? Como assim?',
+                    options: ['Sentí a Dios cerca incluso en lo más difícil.', 'No, en realidad no.', 'No lo sé, nunca lo pensé.'], correct: 0 },
+                  { npc: 'Quizás yo también necesito algo de eso.', npcPt: 'Talvez eu também precise de um pouco disso.',
                     options: ['Dios siempre está cerca de quien lo busca.', 'Eso es imposible para ti.', 'No te puedo ayudar con eso.'], correct: 0 },
                   { npc: 'Gracias por tu tiempo y respeto.', npcPt: 'Obrigado pelo seu tempo e respeito.',
                     options: ['Gracias a ti por escuchar. Que tengas un buen día.', 'Ya era hora de terminar.', 'No me hagas perder el tiempo.'], correct: 0 },
@@ -1168,16 +1176,22 @@ window.CAMINO_DATA = {
               { es: 'Que Dios te acompañe', pt: 'Que Deus te acompanhe' },
             ],
             exercises: [
+              // Ramificado: você escolhe o dia da reunião (domingo ou sábado) e o
+              // convidado confirma conforme a escolha; reconverge no agradecimento.
               { type: 'dialog', prompt: 'Convide alguém para a reunião', persona: 'Conhecido',
                 turns: [
                   { npc: 'Me gustó lo que hablamos el otro día sobre la fe.', npcPt: 'Gostei do que conversamos outro dia sobre a fé.',
-                    options: ['¡Qué bueno! ¿Te gustaría venir a una reunión con nosotros?', 'No me acuerdo de eso.', 'No tengo tiempo ahora.'], correct: 0 },
+                    options: ['¡Qué bueno! ¿Te gustaría venir a una reunión con nosotros?', '¡Qué bueno! Me encantaría que conocieras a mi comunidad.', 'No tengo tiempo ahora.'], correct: 0, accept: [0, 1] },
                   { npc: 'No sé, nunca he ido a una reunión así. ¿Cómo es?', npcPt: 'Não sei, nunca fui a uma reunião assim. Como é?',
                     options: ['Es tranquilo: cantamos, leemos la Biblia y conversamos.', 'Es muy aburrido, pero ven igual.', 'No importa cómo es, solo ven.'], correct: 0 },
                   { npc: '¿Y si tengo preguntas o dudas?', npcPt: 'E se eu tiver perguntas ou dúvidas?',
                     options: ['Puedes preguntar todo lo que quieras, sin problema.', 'No se permiten preguntas.', 'Mejor no preguntes nada.'], correct: 0 },
                   { npc: 'Está bien, me gustaría intentarlo. ¿Cuándo es?', npcPt: 'Tudo bem, eu gostaria de tentar. Quando é?',
-                    options: ['Es el domingo por la mañana. Te espero allí.', 'No sé cuándo es.', 'Cuando quieras, da igual.'], correct: 0 },
+                    options: ['Es el domingo por la mañana. Te espero allí.', 'Es el sábado por la tarde. Te espero allí.', 'No sé cuándo es.'], correct: 0, accept: [0, 1], branches: { 0: 4, 1: 5 } },
+                  { npc: 'El domingo entonces. ¿Está lejos?', npcPt: 'No domingo então. É longe?',
+                    options: ['Está cerca, puedo pasar por ti.', 'No sé dónde es.', 'Búscalo tú.'], correct: 0, branches: { 0: 6 } },
+                  { npc: 'El sábado entonces. ¿Está lejos?', npcPt: 'No sábado então. É longe?',
+                    options: ['Está cerca, puedo pasar por ti.', 'No sé dónde es.', 'Búscalo tú.'], correct: 0 },
                   { npc: 'Perfecto, allí estaré. Gracias por la invitación.', npcPt: 'Perfeito, estarei lá. Obrigado pelo convite.',
                     options: ['Será un placer verte. Que Dios te acompañe.', 'Ojalá no faltes esta vez.', 'Veremos si vienes de verdad.'], correct: 0 },
                 ] },
