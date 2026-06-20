@@ -21,7 +21,14 @@ const ICONS = globalThis.window.CAMINO_ICONS;
 
 function checkExercise(ex, where) {
   if (!ex.prompt) fail(`${where}: sem prompt`);
-  if (!['mcq', 'bank', 'listen', 'speak', 'cloze', 'match', 'grammar', 'pic'].includes(ex.type)) fail(`${where}: tipo inválido (${ex.type})`);
+  if (!['mcq', 'bank', 'listen', 'speak', 'cloze', 'match', 'grammar', 'pic', 'emoji'].includes(ex.type)) fail(`${where}: tipo inválido (${ex.type})`);
+  if (ex.type === 'emoji') {
+    if (!ex.emoji || typeof ex.emoji !== 'string') fail(`${where}: "emoji" sem "emoji"`);
+    if (!Array.isArray(ex.options) || ex.options.length < 2) fail(`${where}: poucas opções`);
+    if (new Set(ex.options).size !== ex.options.length) fail(`${where}: opções duplicadas`);
+    if (typeof ex.correct !== 'number' || !ex.options[ex.correct]) fail(`${where}: índice "correct" inválido`);
+    return;
+  }
   if (ex.type === 'pic') {
     if (!ex.es || typeof ex.es !== 'string') fail(`${where}: "pic" sem "es"`);
     if (!Array.isArray(ex.options) || ex.options.length < 2) fail(`${where}: poucas opções`);

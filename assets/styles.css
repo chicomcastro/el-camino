@@ -338,6 +338,9 @@ a { touch-action: manipulation; }
 .ti-es { font-size: 17px; font-weight: 700; color: #5C19B1; }
 .ti-pt { font-size: 13.5px; font-weight: 600; color: var(--c-ink-2); margin-top: 1px; }
 
+/* emoji (mostra a imagem; escolha a palavra) */
+.emoji-prompt { font-size: 96px; line-height: 1; text-align: center; margin: 6px 0 22px; }
+
 /* pic (toque na imagem / emoji) */
 .pic-word { display: flex; align-items: center; gap: 14px; justify-content: center; margin-bottom: 18px; }
 .pic-word .es { font-size: 24px; font-weight: 800; color: #5C19B1; }
