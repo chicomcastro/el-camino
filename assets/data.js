@@ -950,6 +950,35 @@ window.CAMINO_DATA = {
                 sentence: 'La fe me da ___ en los momentos difíciles', options: ['fuerza', 'miedo', 'prisa', 'sueño'], correct: 0 },
               { type: 'speak', prompt: 'Fale em voz alta', es: 'Encontré paz y un propósito para mi vida', pt: 'Encontrei paz e um propósito para a minha vida' },
             ] },
+          { id: 'av2-m4-l3', title: 'Caminhos da conversa', icon: 'chat',
+            teach: [
+              { es: 'compartir un mensaje de esperanza', pt: 'compartilhar uma mensagem de esperança' },
+              { es: 'sin presión, con cariño', pt: 'sem pressão, com carinho' },
+              { es: 'Hay más de un buen camino', pt: 'Há mais de um bom caminho' },
+            ],
+            exercises: [
+              // Diálogo ramificado: há mais de uma resposta válida (accept) e a conversa
+              // segue por caminhos diferentes (branches) que se reencontram no fim.
+              { type: 'dialog', prompt: 'A conversa muda conforme você responde — há mais de um bom caminho', persona: 'Pessoa na rua',
+                turns: [
+                  { npc: 'Hola, ¿qué están haciendo por aquí?', npcPt: 'Olá, o que vocês estão fazendo por aqui?',
+                    options: ['Compartimos un mensaje de esperanza.', 'Queremos invitarte a una reunión con cariño.', 'Nada importante.'],
+                    correct: 0, accept: [0, 1], branches: { 0: 1, 1: 2 } },
+                  { npc: '¿Un mensaje de esperanza? Cuéntame más.', npcPt: 'Uma mensagem de esperança? Me conte mais.',
+                    options: ['Dios te ama y tiene un plan para ti.', 'Tienes que cambiar de vida.', 'No sé bien, pregúntale a otro.'],
+                    correct: 0, branches: { 0: 3 } },
+                  { npc: '¿Una reunión? No sé si eso es para mí.', npcPt: 'Uma reunião? Não sei se isso é para mim.',
+                    options: ['No hay presión. Es solo una invitación con cariño.', 'Tienes que venir sí o sí.', 'Da igual, como quieras.'],
+                    correct: 0, branches: { 0: 3 } },
+                  { npc: 'Gracias por hablar conmigo con respeto.', npcPt: 'Obrigado por falar comigo com respeito.',
+                    options: ['Que Dios te bendiga. Nos vemos pronto.', 'Adiós para siempre.', 'No vuelvas a molestar.'],
+                    correct: 0 },
+                ] },
+              { type: 'mcq', prompt: 'Neste diálogo, quantas respostas de abertura são aceitas?',
+                options: ['Duas — compartilhar esperança ou convidar com carinho', 'Apenas uma', 'Nenhuma', 'Todas as três'], correct: 0 },
+              { type: 'bank', prompt: 'Monte a frase em espanhol', bubblePt: 'Sem pressão, é só um convite',
+                words: ['No', 'hay', 'presión,', 'es', 'solo', 'una', 'invitación', 'hoy'], solution: ['No', 'hay', 'presión,', 'es', 'solo', 'una', 'invitación'] },
+            ] },
         ]),
         m('av2-m5', 'Compaixão na rua', 'evangelizacao', 'heart', [
           { id: 'av2-m5-l1', title: 'Alguém com fome', icon: 'heart',

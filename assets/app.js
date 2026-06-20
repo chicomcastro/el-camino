@@ -148,6 +148,7 @@
   S.optOrder = null;      // ordem embaralhada das alternativas (mcq/cloze)
   S.dialogTurn = 0;       // diálogo: turno atual
   S.dialogAllOk = true;   // diálogo: acertou todos os turnos até aqui?
+  S.dialogPath = [];      // diálogo: turnos já percorridos [{ t, sel }] (ramificação)
   S.activeExercises = []; // exercícios da sessão em curso
   S.exIndex = 0;
   S.selected = null;
@@ -610,13 +611,14 @@
       var turn = ex.turns[dt];
       var accountP = 'M12,4A4,4 0 0,1 16,8A4,4 0 0,1 12,12A4,4 0 0,1 8,8A4,4 0 0,1 12,4M12,14C16.42,14 20,15.79 20,18V20H4V18C4,15.79 7.58,14 12,14Z';
       html += '<div class="dlg-thread">';
-      // turnos já resolvidos (mostra a fala do interlocutor + a resposta correta)
-      for (var k = 0; k < dt; k++) {
-        var pt = ex.turns[k];
+      // turnos já percorridos (mostra a fala do interlocutor + a resposta escolhida)
+      (S.dialogPath || []).forEach(function (step) {
+        var pt = ex.turns[step.t];
+        if (!pt) return;
         html += '<div class="dlg-row npc"><div class="dlg-av">' + svg(accountP, 18, '#9CA5B8') + '</div>' +
           '<div class="dlg-bubble">' + esc(pt.npc) + '</div></div>';
-        html += '<div class="dlg-row me"><div class="dlg-bubble">' + esc(pt.options[pt.correct]) + '</div></div>';
-      }
+        html += '<div class="dlg-row me"><div class="dlg-bubble">' + esc(pt.options[step.sel]) + '</div></div>';
+      });
       // turno atual: fala do interlocutor
       html += '<div class="dlg-row npc"><div class="dlg-av">' + svg(accountP, 18, '#9CA5B8') + '</div>' +
         '<div class="dlg-bubble">' + esc(turn.npc) +
@@ -625,7 +627,7 @@
         '</div></div>';
       // se já respondeu, mostra a resposta escolhida/correta nesta volta
       if (S.checked) {
-        var chosen = turn.options[S.lastOk ? turn.correct : S.selected];
+        var chosen = turn.options[S.selected];
         html += '<div class="dlg-row me"><div class="dlg-bubble' + (S.lastOk ? '' : ' wrong') + '">' + esc(chosen) + '</div></div>';
         if (!S.lastOk) html += '<div class="dlg-row me"><div class="dlg-bubble">' + esc(turn.options[turn.correct]) + '</div></div>';
       }
@@ -1282,7 +1284,7 @@
   }
   function initEx(i) {
     var ex = S.activeExercises[i];
-    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: ex.type === 'match' ? shuffledIdx(ex.pairs.length) : null, optOrder: initOptOrder(ex), dialogTurn: 0, dialogAllOk: true });
+    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: ex.type === 'match' ? shuffledIdx(ex.pairs.length) : null, optOrder: initOptOrder(ex), dialogTurn: 0, dialogAllOk: true, dialogPath: [] });
     render();
     if (ex.audioEs) speak(ex.audioEs);
     else if ((ex.type === 'speak' || ex.type === 'pic') && ex.es) speak(ex.es);
@@ -1296,7 +1298,7 @@
     var exs = lesson.exercises;
     Object.assign(S, {
       cur: gi, daily: false, review: false, replay: replay, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: initOptOrder(exs[0]), dialogTurn: 0, dialogAllOk: true,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: initOptOrder(exs[0]), dialogTurn: 0, dialogAllOk: true, dialogPath: [],
     });
     // se a lição tem "aprenda", mostra a introdução antes dos exercícios
     if (lesson.teach && lesson.teach.length) { S.screen = 'teach'; render(); return; }
@@ -1367,7 +1369,7 @@
     if (!exs.length) { toast('Conclua uma lição para liberar o desafio'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -1, daily: true, review: false, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: initOptOrder(exs[0]), dialogTurn: 0, dialogAllOk: true,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: initOptOrder(exs[0]), dialogTurn: 0, dialogAllOk: true, dialogPath: [],
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if ((exs[0].type === 'speak' || exs[0].type === 'pic') && exs[0].es) speak(exs[0].es);
@@ -1401,7 +1403,7 @@
     if (!exs.length) { toast('Nada para revisar agora 🙌'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -2, daily: false, review: true, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: initOptOrder(exs[0]), dialogTurn: 0, dialogAllOk: true,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: initOptOrder(exs[0]), dialogTurn: 0, dialogAllOk: true, dialogPath: [],
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if ((exs[0].type === 'speak' || exs[0].type === 'pic') && exs[0].es) speak(exs[0].es);
@@ -1411,8 +1413,11 @@
     var ex = curEx();
     var ok;
     if (ex.type === 'dialog') {
-      // cada turno é avaliado; o acerto do diálogo conta 1x no fim (se tudo certo)
-      ok = S.selected === ex.turns[S.dialogTurn].correct;
+      // cada turno é avaliado; o acerto do diálogo conta 1x no fim (se tudo certo).
+      // "accept" permite mais de uma resposta válida no mesmo turno (variação).
+      var dturn = ex.turns[S.dialogTurn];
+      var accept = dturn.accept || [dturn.correct];
+      ok = accept.indexOf(S.selected) >= 0;
       S.checked = true; S.lastOk = ok;
       if (ok) SFX.correct();
       else { S.hearts = Math.max(0, S.hearts - 1); if (S.hearts === HEARTS_MAX - 1) S.heartsTs = Date.now(); SFX.wrong(); S.dialogAllOk = false; }
@@ -1446,9 +1451,15 @@
     clearAutoAdvance();
     var cx = curEx();
     if (cx.type === 'dialog' && S.checked) {
-      if (S.dialogTurn < cx.turns.length - 1) {
-        // avança para o próximo turno da conversa
-        S.dialogTurn += 1; S.selected = null; S.checked = false; S.lastOk = false;
+      var cturn = cx.turns[S.dialogTurn];
+      // a continuação segue a opção escolhida (se acertou) ou a correta (modelo).
+      var taken = S.lastOk ? S.selected : cturn.correct;
+      S.dialogPath = (S.dialogPath || []).concat([{ t: S.dialogTurn, sel: taken }]);
+      // ramificação opcional: branches[opção] = índice do próximo turno; senão, linear.
+      var nextTurn = (cturn.branches && cturn.branches[taken] != null)
+        ? cturn.branches[taken] : (S.dialogTurn + 1);
+      if (nextTurn >= 0 && nextTurn < cx.turns.length) {
+        S.dialogTurn = nextTurn; S.selected = null; S.checked = false; S.lastOk = false;
         S.optOrder = shuffledIdx(cx.turns[S.dialogTurn].options.length);
         render();
         return;
