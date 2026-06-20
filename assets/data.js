@@ -276,13 +276,17 @@ window.CAMINO_DATA = {
               { es: '¿Cuánto es?', pt: 'Quanto é?' },
             ],
             exercises: [
-              { type: 'dialog', prompt: 'Peça um café na cafeteria', persona: 'Atendente',
+              // Diálogo ramificado: o pedido é seu (café/chá, grande/pequeno) e o
+              // atendente reage à sua escolha; os caminhos se reencontram no preço.
+              { type: 'dialog', prompt: 'Peça na cafeteria — o pedido é seu!', persona: 'Atendente',
                 turns: [
                   { npc: '¡Hola! ¿Qué desea tomar?', npcPt: 'Olá! O que deseja beber?',
-                    options: ['Un café, por favor.', '¿Dónde está el baño?', 'No hablo español.'], correct: 0 },
+                    options: ['Un café, por favor.', 'Un té, por favor.', 'No hablo español.'], correct: 0, accept: [0, 1] },
                   { npc: '¿Lo quiere grande o pequeño?', npcPt: 'Quer grande ou pequeno?',
-                    options: ['Pequeño, por favor.', 'Tengo hambre.', 'Gracias, adiós.'], correct: 0 },
-                  { npc: '¿Algo más?', npcPt: 'Mais alguma coisa?',
+                    options: ['Grande, por favor.', 'Pequeño, por favor.', 'Tengo hambre.'], correct: 0, accept: [0, 1], branches: { 0: 2, 1: 3 } },
+                  { npc: 'Un tamaño grande, perfecto. ¿Algo más?', npcPt: 'Tamanho grande, perfeito. Mais alguma coisa?',
+                    options: ['No, gracias. ¿Cuánto es?', 'Sí, estoy perdido.', '¿Qué hora es?'], correct: 0, branches: { 0: 4 } },
+                  { npc: 'Un tamaño pequeño, perfecto. ¿Algo más?', npcPt: 'Tamanho pequeno, perfeito. Mais alguma coisa?',
                     options: ['No, gracias. ¿Cuánto es?', 'Sí, estoy perdido.', '¿Qué hora es?'], correct: 0 },
                   { npc: 'Son tres euros.', npcPt: 'São três euros.',
                     options: ['Aquí tiene. Gracias.', 'Es muy barato.', 'No tengo hambre.'], correct: 0 },
@@ -306,7 +310,7 @@ window.CAMINO_DATA = {
                   { npc: '¿Tiene la dirección?', npcPt: 'Tem o endereço?',
                     options: ['Sí, está en esta calle.', 'No me gusta el café.', '¿Qué hora es?'], correct: 0 },
                   { npc: '¿Cuántas maletas lleva?', npcPt: 'Quantas malas leva?',
-                    options: ['Solo una, gracias.', 'Estoy perdido.', 'Buenos días.'], correct: 0 },
+                    options: ['Solo una, gracias.', 'Dos, por favor.', 'Estoy perdido.'], correct: 0, accept: [0, 1] },
                   { npc: 'Hemos llegado. Son diez euros.', npcPt: 'Chegamos. São dez euros.',
                     options: ['Gracias. Aquí tiene.', '¿Dónde está el baño?', 'No, gracias.'], correct: 0 },
                 ] },
@@ -395,16 +399,22 @@ window.CAMINO_DATA = {
               { es: 'facturar el equipaje', pt: 'despachar a bagagem' },
             ],
             exercises: [
-              { type: 'dialog', prompt: 'Faça o check-in no guichê da companhia', persona: 'Companhia aérea',
+              // Ramificado: nº de malas e a poltrona (janela/corredor) são sua escolha;
+              // a atendente confirma a poltrona escolhida e os caminhos se reencontram.
+              { type: 'dialog', prompt: 'Faça o check-in — escolha sua poltrona!', persona: 'Companhia aérea',
                 turns: [
                   { npc: 'Buenos días. ¿Su pasaporte, por favor?', npcPt: 'Bom dia. Seu passaporte, por favor?',
                     options: ['Sí, aquí lo tiene.', 'No tengo hambre.', '¿Dónde está el hotel?'], correct: 0 },
                   { npc: '¿Cuántas maletas va a facturar?', npcPt: 'Quantas malas vai despachar?',
-                    options: ['Una maleta, por favor.', 'Voy a la iglesia.', 'Estoy perdido.'], correct: 0 },
+                    options: ['Una maleta, por favor.', 'Dos maletas, por favor.', 'Voy a la iglesia.'], correct: 0, accept: [0, 1] },
                   { npc: '¿Prefiere ventana o pasillo?', npcPt: 'Prefere janela ou corredor?',
-                    options: ['Ventana, por favor.', 'Estoy cansado.', '¿Cuánto cuesta?'], correct: 0 },
-                  { npc: 'Aquí tiene su tarjeta de embarque. La puerta es la 12.', npcPt: 'Aqui está seu cartão de embarque. O portão é o 12.',
+                    options: ['Ventana, por favor.', 'Pasillo, por favor.', 'Estoy cansado.'], correct: 0, accept: [0, 1], branches: { 0: 3, 1: 4 } },
+                  { npc: 'Asiento de ventana, anotado. La puerta es la 12.', npcPt: 'Poltrona na janela, anotado. O portão é o 12.',
+                    options: ['Muchas gracias.', 'No hablo español.', 'Tengo sed.'], correct: 0, branches: { 0: 5 } },
+                  { npc: 'Asiento de pasillo, anotado. La puerta es la 12.', npcPt: 'Poltrona no corredor, anotado. O portão é o 12.',
                     options: ['Muchas gracias.', 'No hablo español.', 'Tengo sed.'], correct: 0 },
+                  { npc: 'Aquí tiene su tarjeta de embarque. ¡Buen viaje!', npcPt: 'Aqui está seu cartão de embarque. Boa viagem!',
+                    options: ['Gracias, igualmente.', 'No, gracias.', '¿Cuánto cuesta?'], correct: 0 },
                 ] },
               { type: 'mcq', prompt: 'O que significa "la tarjeta de embarque"?',
                 options: ['o cartão de embarque', 'o passaporte', 'a bagagem', 'o guichê'], correct: 0 },
@@ -418,16 +428,22 @@ window.CAMINO_DATA = {
               { es: 'la llave', pt: 'a chave' },
             ],
             exercises: [
-              { type: 'dialog', prompt: 'Faça o check-in no hotel', persona: 'Recepcionista',
+              // Ramificado: você escolhe o andar (alto/baixo) e o recepcionista responde
+              // conforme a escolha; os caminhos se reencontram na chave do quarto.
+              { type: 'dialog', prompt: 'Faça o check-in — escolha seu quarto!', persona: 'Recepcionista',
                 turns: [
                   { npc: 'Bienvenido. ¿Tiene una reserva?', npcPt: 'Bem-vindo. Tem uma reserva?',
                     options: ['Sí, a nombre de Lucas Silva.', 'No, gracias.', '¿Qué hora es?'], correct: 0 },
                   { npc: 'Perfecto. ¿Me muestra su pasaporte?', npcPt: 'Perfeito. Pode me mostrar seu passaporte?',
                     options: ['Claro, aquí está.', 'Estoy perdido.', 'Tengo hambre.'], correct: 0 },
-                  { npc: 'Su habitación es la 304, en el tercer piso.', npcPt: 'Seu quarto é o 304, no terceiro andar.',
-                    options: ['Gracias. ¿Dónde está el ascensor?', 'No me gusta.', 'Adiós.'], correct: 0 },
-                  { npc: 'Al fondo a la derecha. Aquí tiene la llave.', npcPt: 'No fundo à direita. Aqui está a chave.',
+                  { npc: '¿Prefiere una habitación en piso alto o bajo?', npcPt: 'Prefere um quarto em andar alto ou baixo?',
+                    options: ['En piso alto, por favor.', 'En piso bajo, por favor.', 'No entiendo.'], correct: 0, accept: [0, 1], branches: { 0: 3, 1: 4 } },
+                  { npc: 'Piso alto, con buena vista. Aquí tiene la llave.', npcPt: 'Andar alto, com boa vista. Aqui está a chave.',
+                    options: ['Muchas gracias, muy amable.', 'No hablo español.', '¿Cuánto cuesta el café?'], correct: 0, branches: { 0: 5 } },
+                  { npc: 'Piso bajo, muy cómodo. Aquí tiene la llave.', npcPt: 'Andar baixo, bem cômodo. Aqui está a chave.',
                     options: ['Muchas gracias, muy amable.', 'No hablo español.', '¿Cuánto cuesta el café?'], correct: 0 },
+                  { npc: '¿Necesita algo más?', npcPt: 'Precisa de mais alguma coisa?',
+                    options: ['¿A qué hora es el desayuno?', 'Estoy perdido.', 'Adiós para siempre.'], correct: 0 },
                 ] },
               { type: 'bank', prompt: 'Monte a frase em espanhol', bubblePt: 'Tenho uma reserva',
                 words: ['Tengo', 'una', 'reserva', 'habitación', 'hoy'], solution: ['Tengo', 'una', 'reserva'] },
@@ -441,14 +457,18 @@ window.CAMINO_DATA = {
               { es: 'La cuenta, por favor', pt: 'A conta, por favor' },
             ],
             exercises: [
-              { type: 'dialog', prompt: 'Peça uma refeição no restaurante', persona: 'Garçom',
+              // Ramificado: o prato (frango/peixe) e a bebida (água/suco) são sua escolha;
+              // o garçom elogia o prato escolhido e os caminhos se reencontram na conta.
+              { type: 'dialog', prompt: 'Peça no restaurante — o prato é seu!', persona: 'Garçom',
                 turns: [
                   { npc: 'Buenas noches. ¿Ya saben qué van a pedir?', npcPt: 'Boa noite. Já sabem o que vão pedir?',
                     options: ['¿Me trae el menú, por favor?', 'Estoy perdido.', 'Soy de Brasil.'], correct: 0 },
                   { npc: 'Claro. ¿Qué desea para comer?', npcPt: 'Claro. O que deseja para comer?',
-                    options: ['Para mí, pollo con arroz.', 'Voy al hotel.', '¿Qué hora es?'], correct: 0 },
-                  { npc: '¿Y para beber?', npcPt: 'E para beber?',
-                    options: ['Agua, por favor.', 'Tengo frío.', 'No, gracias.'], correct: 0 },
+                    options: ['Para mí, pollo con arroz.', 'Para mí, pescado con verduras.', 'Voy al hotel.'], correct: 0, accept: [0, 1], branches: { 0: 2, 1: 3 } },
+                  { npc: 'Buena elección, el pollo. ¿Y para beber?', npcPt: 'Boa escolha, o frango. E para beber?',
+                    options: ['Agua, por favor.', 'Un jugo, por favor.', 'Tengo frío.'], correct: 0, accept: [0, 1], branches: { 0: 4, 1: 4 } },
+                  { npc: 'Buena elección, el pescado. ¿Y para beber?', npcPt: 'Boa escolha, o peixe. E para beber?',
+                    options: ['Agua, por favor.', 'Un jugo, por favor.', 'Tengo frío.'], correct: 0, accept: [0, 1] },
                   { npc: '¿Algo más?', npcPt: 'Mais alguma coisa?',
                     options: ['No, gracias. La cuenta, por favor.', 'Estoy cansado.', 'Buenos días.'], correct: 0 },
                 ] },
