@@ -338,6 +338,17 @@ a { touch-action: manipulation; }
 .ti-es { font-size: 17px; font-weight: 700; color: #5C19B1; }
 .ti-pt { font-size: 13.5px; font-weight: 600; color: var(--c-ink-2); margin-top: 1px; }
 
+/* gramática (carta de regra) */
+.grammar { }
+.gr-title { font-size: 20px; font-weight: 800; color: var(--c-ink); margin-bottom: 8px; }
+.gr-body { font-size: 14.5px; font-weight: 500; color: var(--c-ink-2); line-height: 1.5; margin-bottom: 16px; }
+.gr-table { border: 1.5px solid var(--c-line-2); border-radius: 14px; overflow: hidden; }
+.gr-row { display: flex; align-items: center; border-bottom: 1px solid var(--c-line-2); }
+.gr-row:last-child { border-bottom: none; }
+.gr-row .gr-a { flex: 0 0 42%; padding: 12px 14px; font-size: 15px; font-weight: 700; color: #5C19B1; background: #F7F4FF; }
+.gr-row .gr-b { flex: 1; padding: 12px 14px; font-size: 15px; font-weight: 600; color: var(--c-ink); }
+.gr-example { margin-top: 14px; font-size: 14px; font-weight: 600; color: var(--c-ink-2); font-style: italic; padding: 10px 14px; background: #F7FAFF; border: 1px solid #E4EAF5; border-radius: 12px; }
+
 /* cloze (preencher a lacuna) */
 .cloze-sentence { font-size: 21px; font-weight: 700; color: var(--c-ink); line-height: 1.5; margin-bottom: 8px; text-wrap: pretty; }
 .cloze-blank { display: inline-block; min-width: 64px; text-align: center; border-bottom: 3px solid #CFD6E5;

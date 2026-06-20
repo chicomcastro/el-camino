@@ -25,6 +25,9 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   reduzido, alimenta a revisão espaçada e não altera o progresso.
 - **Aprenda antes de treinar** — lições podem abrir com uma tela de introdução do
   vocabulário (palavra + tradução + áudio ao tocar) antes dos exercícios.
+- **Gramática explícita** — cartas de regra (ex.: verbo *ser*, gênero *el/la*,
+  *ser* vs *estar*) com tabela e exemplo, seguidas de prática (conjugação por
+  cloze, pareamento pronome↔verbo). Cartas são instrucionais e não contam na precisão.
 - **Lição** — variedade de exercícios: múltipla escolha com áudio, "monte a frase"
   (banco de palavras), ditado ("toque no que você ouve"), **preencher a lacuna**
   (cloze), **pareamento** (relacionar colunas ES↔PT) e **fala** (pronúncia: fale a
@@ -79,7 +82,7 @@ icon.svg                ícone (Paloma)
 
 Para adicionar conteúdo, edite `assets/data.js`: a estrutura é
 `levels → modules → lessons → exercises`. Cada lição traz uma lista de
-exercícios (`mcq`, `cloze`, `bank`, `listen`, `match`, `speak`), pode ter um
+exercícios (`mcq`, `cloze`, `bank`, `listen`, `match`, `speak`, `grammar`), pode ter um
 `teach` opcional (intro de vocabulário) e cada módulo carrega um tema/cor. As
 conquistas (`achievements`) podem ser por nível concluído (`kind: 'level'`),
 nº de lições (`kind: 'lessons'`) ou ofensiva (`kind: 'streak'`).
