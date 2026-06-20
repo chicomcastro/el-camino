@@ -550,6 +550,7 @@
     var isMatch = ex.type === 'match';
     var isGrammar = ex.type === 'grammar';
     var isPic = ex.type === 'pic';
+    var isEmoji = ex.type === 'emoji';
     var pct = Math.round(((S.exIndex + (S.checked ? 1 : 0)) / len) * 100);
     var hc = heartsColor(S.hearts);
 
@@ -583,6 +584,12 @@
     if (ex.bubblePt) {
       html += '<div class="bubble">' + mascot(58, 'happy') +
         '<div class="box"><div class="txt">' + esc(ex.bubblePt) + '</div><span class="tail"></span></div></div>';
+    }
+
+    // EMOJI (mostra a imagem; escolha a palavra)
+    if (isEmoji) {
+      html += '<div class="emoji-prompt">' + esc(ex.emoji) + '</div>';
+      html += optionsHtml(ex);
     }
 
     // PIC (toque na imagem / emoji)
@@ -701,12 +708,14 @@
     html += '</div>'; // lesson-body
 
     // footer / verificar
-    var canVerify = (isMcq || isCloze || isPic) ? S.selected !== null : (isBank ? S.answer.length > 0 : false);
+    var canVerify = (isMcq || isCloze || isPic || isEmoji) ? S.selected !== null : (isBank ? S.answer.length > 0 : false);
     var enabled = S.checked || canVerify;
     var footerBg = !S.checked ? '#fff' : (S.lastOk ? '#E7FEEA' : '#FFF4E5');
-    var correctAnswer = (isSpeak || isPic) ? ex.es
-      : ((isMcq || isCloze) ? (ex.options ? ex.options[ex.correct] : '')
-      : (isMatch ? '' : (ex.solution ? ex.solution.join(' ') : '')));
+    var correctAnswer = '';
+    if (isSpeak || isPic) correctAnswer = ex.es;
+    else if (isMcq || isCloze || isEmoji) correctAnswer = ex.options ? ex.options[ex.correct] : '';
+    else if (isMatch) correctAnswer = '';
+    else correctAnswer = ex.solution ? ex.solution.join(' ') : '';
 
     html += '<div class="footer">';
     if (S.checked) {
@@ -1161,7 +1170,7 @@
   }
   function initEx(i) {
     var ex = S.activeExercises[i];
-    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: ex.type === 'match' ? shuffledIdx(ex.pairs.length) : null, optOrder: (ex.type === 'mcq' || ex.type === 'cloze' || ex.type === 'pic') ? shuffledIdx(ex.options.length) : null });
+    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: ex.type === 'match' ? shuffledIdx(ex.pairs.length) : null, optOrder: (ex.type === 'mcq' || ex.type === 'cloze' || ex.type === 'pic' || ex.type === 'emoji') ? shuffledIdx(ex.options.length) : null });
     render();
     if (ex.audioEs) speak(ex.audioEs);
     else if ((ex.type === 'speak' || ex.type === 'pic') && ex.es) speak(ex.es);
@@ -1175,7 +1184,7 @@
     var exs = lesson.exercises;
     Object.assign(S, {
       cur: gi, daily: false, review: false, replay: replay, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: (exs[0].type === 'mcq' || exs[0].type === 'cloze' || exs[0].type === 'pic') ? shuffledIdx(exs[0].options.length) : null,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: (exs[0].type === 'mcq' || exs[0].type === 'cloze' || exs[0].type === 'pic' || exs[0].type === 'emoji') ? shuffledIdx(exs[0].options.length) : null,
     });
     // se a lição tem "aprenda", mostra a introdução antes dos exercícios
     if (lesson.teach && lesson.teach.length) { S.screen = 'teach'; render(); return; }
@@ -1246,7 +1255,7 @@
     if (!exs.length) { toast('Conclua uma lição para liberar o desafio'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -1, daily: true, review: false, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: (exs[0].type === 'mcq' || exs[0].type === 'cloze' || exs[0].type === 'pic') ? shuffledIdx(exs[0].options.length) : null,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: (exs[0].type === 'mcq' || exs[0].type === 'cloze' || exs[0].type === 'pic' || exs[0].type === 'emoji') ? shuffledIdx(exs[0].options.length) : null,
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if ((exs[0].type === 'speak' || exs[0].type === 'pic') && exs[0].es) speak(exs[0].es);
@@ -1280,7 +1289,7 @@
     if (!exs.length) { toast('Nada para revisar agora 🙌'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -2, daily: false, review: true, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: (exs[0].type === 'mcq' || exs[0].type === 'cloze' || exs[0].type === 'pic') ? shuffledIdx(exs[0].options.length) : null,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', speakHits: null, speakAcc: 0, speakAwarded: false, matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: (exs[0].type === 'mcq' || exs[0].type === 'cloze' || exs[0].type === 'pic' || exs[0].type === 'emoji') ? shuffledIdx(exs[0].options.length) : null,
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if ((exs[0].type === 'speak' || exs[0].type === 'pic') && exs[0].es) speak(exs[0].es);
@@ -1289,7 +1298,7 @@
   function verify() {
     var ex = curEx();
     var ok;
-    if (ex.type === 'mcq' || ex.type === 'cloze' || ex.type === 'pic') ok = S.selected === ex.correct;
+    if (ex.type === 'mcq' || ex.type === 'cloze' || ex.type === 'pic' || ex.type === 'emoji') ok = S.selected === ex.correct;
     else ok = S.answer.map(function (a) { return a.w; }).join(' ') === ex.solution.join(' ');
     S.checked = true;
     S.lastOk = ok;

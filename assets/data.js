@@ -684,3 +684,63 @@ window.CAMINO_DATA.levels.forEach(function (lv) {
     });
   });
 });
+
+/* ------------------------------------------------------------
+   Vocabulário ilustrado (emoji → palavra). Gera muitos exercícios
+   do tipo `emoji` nos níveis iniciais, com distratores da mesma
+   categoria. Cada item: [emoji, palavra em espanhol].
+   ------------------------------------------------------------ */
+var EMOJI_GROUPS = [
+  { id: 'voc-comida', title: 'Comida e bebida', icon: 'cart', level: 'iniciante', items: [
+    ['💧', 'agua'], ['🍞', 'pan'], ['☕', 'café'], ['🥛', 'leche'], ['🍎', 'manzana'],
+    ['🍌', 'plátano'], ['🧀', 'queso'], ['🥚', 'huevo'], ['🍖', 'carne'], ['🐟', 'pescado'] ] },
+  { id: 'voc-animais', title: 'Animais', icon: 'star', level: 'iniciante', items: [
+    ['🐶', 'perro'], ['🐱', 'gato'], ['🐴', 'caballo'], ['🐮', 'vaca'], ['🐦', 'pájaro'],
+    ['🐑', 'oveja'], ['🦁', 'león'], ['🐘', 'elefante'], ['🐰', 'conejo'], ['🐝', 'abeja'] ] },
+  { id: 'voc-transporte', title: 'Transporte', icon: 'plane', level: 'basico', items: [
+    ['🚌', 'autobús'], ['🚗', 'coche'], ['✈️', 'avión'], ['🚆', 'tren'], ['🚕', 'taxi'],
+    ['⛵', 'barco'], ['🚲', 'bicicleta'], ['🏍️', 'moto'] ] },
+  { id: 'voc-lugares', title: 'Lugares', icon: 'map', level: 'basico', items: [
+    ['🏨', 'hotel'], ['🏠', 'casa'], ['⛪', 'iglesia'], ['🏥', 'hospital'], ['🏫', 'escuela'],
+    ['🏪', 'tienda'], ['🏦', 'banco'], ['🚪', 'puerta'] ] },
+  { id: 'voc-natureza', title: 'Natureza', icon: 'star', level: 'basico', items: [
+    ['☀️', 'sol'], ['🌧️', 'lluvia'], ['🌙', 'luna'], ['⭐', 'estrella'], ['🌳', 'árbol'],
+    ['🌸', 'flor'], ['🌊', 'mar'], ['🔥', 'fuego'] ] },
+  { id: 'voc-objetos', title: 'Objetos', icon: 'book', level: 'basico', items: [
+    ['📖', 'libro'], ['📱', 'teléfono'], ['💰', 'dinero'], ['🔑', 'llave'], ['⌚', 'reloj'],
+    ['🧳', 'maleta'], ['🛏️', 'cama'], ['🪑', 'silla'] ] },
+];
+
+(function buildEmojiVocab() {
+  function levelById(id) {
+    return window.CAMINO_DATA.levels.filter(function (lv) { return lv.id === id; })[0];
+  }
+  EMOJI_GROUPS.forEach(function (g) {
+    var lv = levelById(g.level);
+    if (!lv) return;
+    var n = g.items.length;
+    var exercises = g.items.map(function (item, i) {
+      var word = item[1];
+      var opts = [word,
+        g.items[(i + 1) % n][1],
+        g.items[(i + 2) % n][1],
+        g.items[(i + 3) % n][1]];
+      return { type: 'emoji', prompt: 'Qual é a palavra?', emoji: item[0], options: opts, correct: 0 };
+    });
+    // ensina o vocabulário antes (tela "Aprenda")
+    var teach = g.items.map(function (item) { return { es: item[1], pt: item[0] }; });
+    // divide em lições de até 5 exercícios
+    var lessons = [];
+    for (var s = 0; s < exercises.length; s += 5) {
+      var idx = (s / 5) + 1;
+      lessons.push({
+        id: g.id + '-l' + idx,
+        title: g.title + (exercises.length > 5 ? ' ' + idx : ''),
+        icon: g.icon,
+        teach: idx === 1 ? teach.slice(0, 8) : undefined,
+        exercises: exercises.slice(s, s + 5),
+      });
+    }
+    lv.modules.push(m(g.id, '🖼️ ' + g.title, 'viagem', g.icon, lessons));
+  });
+})();
