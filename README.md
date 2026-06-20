@@ -52,6 +52,9 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   estrutura do testemunho pessoal (antes → encontro → agora) e respostas
   respeitosas às objeções mais comuns ("não tenho tempo", "há muitas religiões",
   "já sofri demais"), no Avançado 1.
+- **Vocabulário bíblico** — módulo no Intermediário 2 com os termos de fé além do
+  básico (graça, pecado, perdão, salvação, oração, bênção, evangelho, Espírito
+  Santo), praticados em significado, pareamento, frase e fala.
 - **Desafio do dia** — uma revisão rápida diária que **prioriza os itens vencidos
   da revisão espaçada (SRS)** e completa com exercícios sorteados do que já foi
   aprendido (estáveis durante o dia); dá bônus de XP e gemas.
