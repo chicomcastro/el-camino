@@ -249,15 +249,19 @@ window.CAMINO_DATA = {
               { es: '¿Puedo orar por ti?', pt: 'Posso orar por você?' },
             ],
             exercises: [
+              // Ramificado: você escolhe a mensagem (amor ou esperança) e a pessoa
+              // reage conforme a sua escolha; os caminhos se reencontram na oração.
               { type: 'dialog', prompt: 'Uma primeira conversa simples na rua', persona: 'Pessoa na rua',
                 turns: [
                   { npc: 'Hola, ¿cómo estás?', npcPt: 'Olá, como você está?',
-                    options: ['¡Hola! Bien, gracias.', 'No, gracias.', '¿Cuánto cuesta?'], correct: 0 },
+                    options: ['¡Hola! Bien, gracias.', '¡Hola! Muy bien, ¿y tú?', 'No, gracias.'], correct: 0, accept: [0, 1] },
                   { npc: '¿Y qué haces por aquí?', npcPt: 'E o que você faz por aqui?',
                     options: ['Soy cristiano y quiero compartir algo bueno.', 'Estoy perdido.', 'Tengo hambre.'], correct: 0 },
                   { npc: '¿Algo bueno? ¿Qué es?', npcPt: 'Algo bom? O que é?',
-                    options: ['Dios te ama mucho.', 'No sé.', 'Adiós.'], correct: 0 },
-                  { npc: 'Gracias, qué bonito.', npcPt: 'Obrigado, que bonito.',
+                    options: ['Dios te ama mucho.', 'Hay esperanza para ti.', 'No sé.'], correct: 0, accept: [0, 1], branches: { 0: 3, 1: 4 } },
+                  { npc: 'Qué bonito escuchar eso.', npcPt: 'Que bonito ouvir isso.',
+                    options: ['¿Puedo orar por ti?', 'No hablo español.', '¿Qué hora es?'], correct: 0, branches: { 0: 5 } },
+                  { npc: 'Gracias, necesitaba escuchar eso.', npcPt: 'Obrigado, eu precisava ouvir isso.',
                     options: ['¿Puedo orar por ti?', 'No hablo español.', '¿Qué hora es?'], correct: 0 },
                   { npc: 'Sí, gracias.', npcPt: 'Sim, obrigado.',
                     options: ['Dios te bendiga.', 'No, gracias.', 'Estoy cansado.'], correct: 0 },
@@ -486,15 +490,19 @@ window.CAMINO_DATA = {
               { es: '¿Te gustaría hablar más?', pt: 'Você gostaria de conversar mais?' },
             ],
             exercises: [
+              // Ramificado: você escolhe o que tocou em você (propósito ou paz) e o
+              // jovem se identifica conforme a escolha; os caminhos se reencontram.
               { type: 'dialog', prompt: 'Aborde um jovem com naturalidade', persona: 'Jovem',
                 turns: [
                   { npc: '¿Qué onda? ¿Qué hacen aquí?', npcPt: 'E aí? O que vocês fazem aqui?',
-                    options: ['Hola, hablamos de algo que da esperanza.', 'No, gracias.', 'Estoy perdido.'], correct: 0 },
+                    options: ['Hola, hablamos de algo que da esperanza.', 'Hola, compartimos algo que cambió nuestra vida.', 'No, gracias.'], correct: 0, accept: [0, 1] },
                   { npc: '¿Esperanza? La vida es complicada, amigo.', npcPt: 'Esperança? A vida é complicada, amigo.',
                     options: ['Te entiendo. Yo también pensaba así.', 'No me importa.', 'Adiós.'], correct: 0 },
                   { npc: '¿Y qué cambió?', npcPt: 'E o que mudou?',
-                    options: ['Conocí a Dios y encontré un propósito.', 'Nada.', 'No sé.'], correct: 0 },
-                  { npc: 'Suena interesante. Nunca lo pensé.', npcPt: 'Parece interessante. Nunca pensei nisso.',
+                    options: ['Conocí a Dios y encontré un propósito.', 'Encontré paz en medio del caos.', 'Nada.'], correct: 0, accept: [0, 1], branches: { 0: 3, 1: 4 } },
+                  { npc: 'Un propósito... eso me hace falta.', npcPt: 'Um propósito... isso me faz falta.',
+                    options: ['¿Te gustaría hablar más un día?', 'Olvídalo.', 'Tengo prisa.'], correct: 0, branches: { 0: 5 } },
+                  { npc: 'Paz... la verdad, me vendría bien.', npcPt: 'Paz... sinceramente, me faria bem.',
                     options: ['¿Te gustaría hablar más un día?', 'Olvídalo.', 'Tengo prisa.'], correct: 0 },
                   { npc: 'Sí, ¿por qué no?', npcPt: 'Sim, por que não?',
                     options: ['¡Genial! Que Dios te bendiga.', 'No, mejor no.', 'No hablo español.'], correct: 0 },
@@ -511,17 +519,23 @@ window.CAMINO_DATA = {
               { es: 'Que Dios le bendiga', pt: 'Que Deus o(a) abençoe (formal)' },
             ],
             exercises: [
+              // Ramificado: ao saber que é crente, você pode orar OU pedir a história
+              // de fé; ambos os caminhos respeitosos se reencontram na despedida.
               { type: 'dialog', prompt: 'Aborde uma pessoa idosa com respeito (use "usted")', persona: 'Idoso(a)',
                 turns: [
                   { npc: 'Buenas tardes, joven.', npcPt: 'Boa tarde, jovem.',
-                    options: ['Buenas tardes. ¿Cómo está usted?', '¿Qué onda?', 'Tengo hambre.'], correct: 0 },
+                    options: ['Buenas tardes. ¿Cómo está usted?', 'Buenas tardes, ¿puedo saludarle?', '¿Qué onda?'], correct: 0, accept: [0, 1] },
                   { npc: 'Aquí, descansando un poco.', npcPt: 'Aqui, descansando um pouco.',
                     options: ['¿Puedo acompañarle un momento?', 'No, gracias.', 'Adiós.'], correct: 0 },
                   { npc: 'Claro, siéntese. ¿De dónde es?', npcPt: 'Claro, sente-se. De onde o(a) senhor(a) é?',
                     options: ['Soy de Brasil, soy misionero.', 'No sé.', 'Tengo prisa.'], correct: 0 },
                   { npc: 'Qué bien. Yo soy creyente desde joven.', npcPt: 'Que bom. Eu sou crente desde jovem.',
-                    options: ['Qué bendición. ¿Puedo orar con usted?', 'No me importa.', '¿Cuánto cuesta?'], correct: 0 },
-                  { npc: 'Me encantaría, gracias.', npcPt: 'Eu adoraria, obrigado.',
+                    options: ['Qué bendición. ¿Puedo orar con usted?', 'Qué bonito. ¿Me cuenta su historia de fe?', 'No me importa.'], correct: 0, accept: [0, 1], branches: { 0: 4, 1: 5 } },
+                  { npc: 'Me encantaría que ore por mí.', npcPt: 'Eu adoraria que você orasse por mim.',
+                    options: ['Será un honor. Que Dios le bendiga.', 'No, mejor no.', 'No hablo español.'], correct: 0, branches: { 0: 6 } },
+                  { npc: 'Con gusto. Dios siempre fue fiel conmigo.', npcPt: 'Com prazer. Deus sempre foi fiel comigo.',
+                    options: ['Gracias por compartir, me inspira.', 'No me interesa.', 'Tengo prisa.'], correct: 0 },
+                  { npc: 'Gracias por este momento, joven.', npcPt: 'Obrigado por este momento, jovem.',
                     options: ['Que Dios le bendiga siempre.', 'No, mejor no.', 'No hablo español.'], correct: 0 },
                 ] },
               { type: 'mcq', prompt: 'Por que usamos "¿Cómo está usted?" com a pessoa idosa?',
