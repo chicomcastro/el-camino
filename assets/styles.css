@@ -309,6 +309,16 @@ a { touch-action: manipulation; }
 }
 .opt span { font-size: 16px; font-weight: 600; color: var(--c-ink); }
 .opt:active:not(:disabled) { transform: translateY(2px); border-bottom-width: 2px; }
+.opt-row { display: flex; align-items: stretch; gap: 8px; }
+.opt-row .opt { flex: 1; }
+.opt-audio { flex: 0 0 48px; border: 2px solid #E0D2FA; border-bottom-width: 4px; border-radius: 14px;
+  background: #F5F0FF; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: transform 0.08s; }
+.opt-audio:active { transform: translateY(2px); border-bottom-width: 2px; }
+
+/* barra de avanço automático após o feedback */
+.autobar { height: 5px; padding: 0 22px; }
+.autobar > i { display: block; height: 5px; border-radius: 3px; width: 100%; transform-origin: left; animation: autoShrink linear forwards; }
+@keyframes autoShrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
 /* word bank / dictation */
 .answer-line {

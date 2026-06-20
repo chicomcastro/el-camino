@@ -520,11 +520,19 @@
     return html;
   }
 
-  // Alternativas (MCQ/cloze) renderizadas na ordem embaralhada de S.optOrder.
+  var SPEAKER_PATH = 'M14,3.23V5.29C16.89,6.15 19,8.83 19,12C19,15.17 16.89,17.84 14,18.7V20.77C18,19.86 21,16.28 21,12C21,7.72 18,4.14 14,3.23M16.5,12C16.5,10.23 15.5,8.71 14,7.97V16C15.5,15.29 16.5,13.76 16.5,12M3,9V15H7L12,20V4L7,9H3Z';
+  // As alternativas estão em espanhol? (então cabe botão de ouvir cada uma)
+  function optionsAreSpanish(ex) {
+    if (ex.type === 'cloze' || ex.type === 'emoji') return true;
+    if (ex.type === 'mcq') return !/signific|portugu/i.test(ex.prompt || '');
+    return false;
+  }
+  // Alternativas (MCQ/cloze/emoji) na ordem embaralhada de S.optOrder.
   // data-i continua sendo o índice ORIGINAL, então a verificação não muda.
   function optionsHtml(ex) {
     var order = (S.optOrder && S.optOrder.length === ex.options.length) ? S.optOrder
       : ex.options.map(function (_, i) { return i; });
+    var spk = optionsAreSpanish(ex);
     var html = '<div class="mcq">';
     order.forEach(function (i) {
       var text = ex.options[i];
@@ -532,10 +540,13 @@
       if (S.checked) {
         if (i === ex.correct) { bg = '#E7FEEA'; border = '#1AC136'; color = '#0B8C21'; }
         else if (i === S.selected) { bg = '#FFF4E5'; border = '#E8A13C'; color = '#8E570B'; }
-      } else if (i === S.selected) { bg = '#FFE6E9'; border = '#FF8995'; color = '#C71C2D'; }
+      } else if (i === S.selected) { bg = '#E5EEFF'; border = '#3C76E8'; color = '#0D378C'; } // selecionado = azul (não "errado")
+      html += '<div class="opt-row">';
       html += '<button class="opt" ' + (S.checked ? 'disabled' : 'data-act="select" data-i="' + i + '"') +
         ' style="background:' + bg + ';border-color:' + border + ';"><span style="color:' + color + ';">' +
         esc(text) + '</span></button>';
+      if (spk) html += '<button class="opt-audio" data-act="speakOpt" data-text="' + esc(text) + '" aria-label="Ouvir">' + svg(SPEAKER_PATH, 18, '#9D55FF') + '</button>';
+      html += '</div>';
     });
     return html + '</div>';
   }
@@ -725,6 +736,11 @@
       html += '<div class="feedback" style="background:' + footerBg + ';">' +
         '<div class="ttl" style="color:' + fg + ';">' + svg(icon, 22, fg) + '<span>' + title + '</span></div>' +
         (correctAnswer ? '<div class="msg" style="color:' + fg + ';">' + esc(correctAnswer) + '</div>' : '') + '</div>';
+      // barra de contagem do avanço automático (não no speak, que permite repetir)
+      if (!isSpeak) {
+        html += '<div class="autobar" style="background:' + footerBg + ';"><i style="background:' + fg +
+          ';animation-duration:' + autoAdvanceDelay() + 'ms;"></i></div>';
+      }
     }
     // speak/match antes de concluir não têm botão (a ação é o microfone / parear)
     var showBtn = !((isSpeak || isMatch) && !S.checked);
@@ -910,6 +926,7 @@
 
   function render() {
     ensureDaily();
+    if (S.screen !== 'lesson') clearAutoAdvance();
 
     // salva o scroll atual antes de recriar o DOM
     var prevScroll = root.querySelector('.scroll');
@@ -1089,6 +1106,7 @@
     S.checked = true; S.lastOk = true; S.correct += 1;
     srsRecord(EX_ID_OF.get(curEx()), true);
     persist(); render();
+    scheduleAutoAdvance();
   }
   // Confirma o resultado da fala (sem tirar vidas — prática de baixo risco).
   // Conta o acerto só uma vez por exercício, mesmo com "tentar de novo".
@@ -1307,8 +1325,21 @@
     srsRecord(EX_ID_OF.get(ex), ok); // agenda a revisão espaçada deste item
     persist();
     render();
+    scheduleAutoAdvance();
+  }
+  // Avança sozinho após o feedback (mais tempo quando erra, p/ ler a correta).
+  var _advanceTimer = null;
+  function clearAutoAdvance() { if (_advanceTimer) { clearTimeout(_advanceTimer); _advanceTimer = null; } }
+  function autoAdvanceDelay() { return S.lastOk ? 1300 : 2800; }
+  function scheduleAutoAdvance() {
+    clearAutoAdvance();
+    _advanceTimer = setTimeout(function () {
+      _advanceTimer = null;
+      if (S.screen === 'lesson' && S.checked) next();
+    }, autoAdvanceDelay());
   }
   function next() {
+    clearAutoAdvance();
     if (S.hearts <= 0) { set({ screen: 'lives' }); return; }
     var len = curLessonLen();
     if (S.exIndex >= len - 1) {
@@ -1500,6 +1531,7 @@
       case 'matchRight': matchRight(parseInt(t.getAttribute('data-i'), 10)); break;
       case 'teachDone': beginExercises(); break;
       case 'speakText': speak(t.getAttribute('data-text')); break;
+      case 'speakOpt': speak(t.getAttribute('data-text')); break;
       case 'speakSkip': S.speakHeard = ''; S.speakStatus = 'done'; commitSpeak(true); break;
       case 'speakSelfOk': S.speakHeard = ''; S.speakStatus = 'done'; commitSpeak(true); break;
       case 'speakRetry': speakRetry(); break;

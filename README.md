@@ -36,7 +36,10 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   (`pic`: palavra → emoji; `emoji`: emoji → palavra, com módulos de vocabulário
   ilustrado nos níveis iniciais) e **fala** (pronúncia: fale a
   frase e o app reconhece a voz), com barra de progresso, feedback de acerto/erro
-  e voz em espanhol (Web Speech API). O exercício de fala dá **feedback de
+  e voz em espanhol (Web Speech API). Nas alternativas em espanhol há um botão de
+  **ouvir cada opção** (treino de listening); ao verificar, o feedback aparece e a
+  lição **avança sozinha** após um breve cronômetro (dá pra tocar CONTINUAR antes).
+  O exercício de fala dá **feedback de
   pronúncia palavra por palavra** (verde/vermelho) com % de precisão e botão de
   tentar de novo; não tira vidas e tem alternativa (auto-avaliação) onde o
   navegador não reconhece voz.
