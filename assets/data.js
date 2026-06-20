@@ -206,6 +206,43 @@ window.CAMINO_DATA = {
               words: ['Es', 'muy', 'barato', 'caro'], solution: ['Es', 'muy', 'barato'] },
           ] },
         ]),
+        m('bas-m3', 'Primeiras palavras de fé', 'evangelizacao', 'heart', [
+          { id: 'bas-m3-l1', title: 'Sou cristão', icon: 'heart',
+            teach: [
+              { es: 'Soy cristiano', pt: 'Sou cristão' },
+              { es: 'Creo en Dios', pt: 'Creio em Deus' },
+              { es: 'Voy a la iglesia', pt: 'Vou à igreja' },
+              { es: 'Dios te bendiga', pt: 'Deus te abençoe' },
+            ],
+            exercises: [
+              { type: 'mcq', prompt: 'O que significa?', bubblePt: 'Soy cristiano',
+                options: ['Sou cristão', 'Sou missionário', 'Sou brasileiro', 'Sou estudante'], correct: 0 },
+              { type: 'bank', prompt: 'Monte a frase em espanhol', bubblePt: 'Vou à igreja',
+                words: ['Voy', 'a', 'la', 'iglesia', 'casa', 'hoy'], solution: ['Voy', 'a', 'la', 'iglesia'] },
+              { type: 'mcq', prompt: 'Como se diz "Deus te abençoe"?',
+                options: ['Dios te bendiga', 'Dios te ama', 'Gracias a Dios', 'Ve con Dios'], correct: 0 },
+              { type: 'cloze', prompt: 'Complete a frase', pt: 'Creio em Deus',
+                sentence: 'Creo en ___', options: ['Dios', 'casa', 'paz', 'fe'], correct: 0 },
+              { type: 'speak', prompt: 'Fale em voz alta', es: 'Dios te bendiga', pt: 'Deus te abençoe' },
+            ] },
+          { id: 'bas-m3-l2', title: 'Um convite', icon: 'chat',
+            teach: [
+              { es: '¿Quieres venir a la iglesia?', pt: 'Quer vir à igreja?' },
+              { es: 'Te invito', pt: 'Eu te convido' },
+              { es: 'Hay una reunión el domingo', pt: 'Tem uma reunião no domingo' },
+            ],
+            exercises: [
+              { type: 'mcq', prompt: 'O que significa?', bubblePt: '¿Quieres venir a la iglesia?',
+                options: ['Quer vir à igreja?', 'Onde fica a igreja?', 'Você vai à igreja?', 'Gosta da igreja?'], correct: 0 },
+              { type: 'bank', prompt: 'Monte o convite em espanhol', bubblePt: 'Eu te convido à igreja',
+                words: ['Te', 'invito', 'a', 'la', 'iglesia', 'hoy'], solution: ['Te', 'invito', 'a', 'la', 'iglesia'] },
+              { type: 'mcq', prompt: 'Como se diz "Tem uma reunião no domingo"?',
+                options: ['Hay una reunión el domingo', 'Voy a la iglesia el domingo', 'La iglesia está cerca', 'Te veo el domingo'], correct: 0 },
+              { type: 'listen', prompt: 'Toque no que você ouve', audioEs: '¿Quieres venir?', dictation: true,
+                words: ['¿Quieres', 'venir?', 'conmigo', 'hoy'], solution: ['¿Quieres', 'venir?'] },
+              { type: 'speak', prompt: 'Fale em voz alta', es: '¿Quieres venir a la iglesia?', pt: 'Quer vir à igreja?' },
+            ] },
+        ]),
       ] },
 
     // ===================== 3 · INTERMEDIÁRIO 1 =====================
