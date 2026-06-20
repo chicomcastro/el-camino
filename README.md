@@ -47,7 +47,10 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   vários turnos (um estranho fala em espanhol e o aprendiz escolhe a melhor
   resposta a cada turno), renderizada como um chat com balões, áudio das falas e
   feedback turno a turno. Cobre primeiro contato, resposta a objeções com respeito
-  e convite para a reunião — treino direto da missão.
+  e convite para a reunião — treino direto da missão. Os diálogos podem ter
+  **respostas alternativas válidas** (`accept`) e **ramificações** (`branches`),
+  onde a conversa segue caminhos diferentes conforme a sua escolha e se reencontra
+  no final — aumentando a rejogabilidade.
 - **Diálogos de viagem** — o mesmo formato de chat aplicado às situações clássicas
   da viagem: cafeteria, táxi até o hotel (Básico); check-in no aeroporto, check-in
   no hotel, pedido no restaurante (Intermediário 1); imigração e lanche a bordo

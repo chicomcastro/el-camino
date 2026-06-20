@@ -29,6 +29,21 @@ function checkExercise(ex, where) {
       if (!Array.isArray(tn.options) || tn.options.length < 2) fail(`${where}: turno ${i} poucas opções`);
       if (new Set(tn.options).size !== tn.options.length) fail(`${where}: turno ${i} opções duplicadas`);
       if (typeof tn.correct !== 'number' || !tn.options[tn.correct]) fail(`${where}: turno ${i} "correct" inválido`);
+      // "accept": respostas alternativas válidas no turno
+      if (tn.accept !== undefined) {
+        if (!Array.isArray(tn.accept) || tn.accept.length < 1) fail(`${where}: turno ${i} "accept" deve ser lista não-vazia`);
+        (tn.accept || []).forEach((a) => { if (typeof a !== 'number' || !tn.options[a]) fail(`${where}: turno ${i} "accept" índice inválido (${a})`); });
+        if (Array.isArray(tn.accept) && tn.accept.indexOf(tn.correct) < 0) fail(`${where}: turno ${i} "accept" deve incluir "correct"`);
+      }
+      // "branches": opção → índice do próximo turno (ramificação)
+      if (tn.branches !== undefined) {
+        if (typeof tn.branches !== 'object' || tn.branches === null) fail(`${where}: turno ${i} "branches" deve ser objeto`);
+        else Object.keys(tn.branches).forEach((k) => {
+          const oi = Number(k); const dest = tn.branches[k];
+          if (!Number.isInteger(oi) || !tn.options[oi]) fail(`${where}: turno ${i} "branches" opção inválida (${k})`);
+          if (!Number.isInteger(dest) || dest < 0 || dest >= (ex.turns || []).length) fail(`${where}: turno ${i} "branches" destino inválido (${dest})`);
+        });
+      }
     });
     return;
   }
