@@ -48,6 +48,10 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   resposta a cada turno), renderizada como um chat com balões, áudio das falas e
   feedback turno a turno. Cobre primeiro contato, resposta a objeções com respeito
   e convite para a reunião — treino direto da missão.
+- **Kit de campo** — módulo prático para o missionário montar a própria fala:
+  estrutura do testemunho pessoal (antes → encontro → agora) e respostas
+  respeitosas às objeções mais comuns ("não tenho tempo", "há muitas religiões",
+  "já sofri demais"), no Avançado 1.
 - **Desafio do dia** — uma revisão rápida diária que **prioriza os itens vencidos
   da revisão espaçada (SRS)** e completa com exercícios sorteados do que já foi
   aprendido (estáveis durante o dia); dá bônus de XP e gemas.
