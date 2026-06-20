@@ -21,7 +21,17 @@ const ICONS = globalThis.window.CAMINO_ICONS;
 
 function checkExercise(ex, where) {
   if (!ex.prompt) fail(`${where}: sem prompt`);
-  if (!['mcq', 'bank', 'listen', 'speak', 'cloze', 'match', 'grammar', 'pic', 'emoji'].includes(ex.type)) fail(`${where}: tipo inválido (${ex.type})`);
+  if (!['mcq', 'bank', 'listen', 'speak', 'cloze', 'match', 'grammar', 'pic', 'emoji', 'dialog'].includes(ex.type)) fail(`${where}: tipo inválido (${ex.type})`);
+  if (ex.type === 'dialog') {
+    if (!Array.isArray(ex.turns) || ex.turns.length < 1) fail(`${where}: "dialog" precisa de "turns"`);
+    (ex.turns || []).forEach((tn, i) => {
+      if (!tn.npc) fail(`${where}: turno ${i} sem "npc"`);
+      if (!Array.isArray(tn.options) || tn.options.length < 2) fail(`${where}: turno ${i} poucas opções`);
+      if (new Set(tn.options).size !== tn.options.length) fail(`${where}: turno ${i} opções duplicadas`);
+      if (typeof tn.correct !== 'number' || !tn.options[tn.correct]) fail(`${where}: turno ${i} "correct" inválido`);
+    });
+    return;
+  }
   if (ex.type === 'emoji') {
     if (!ex.emoji || typeof ex.emoji !== 'string') fail(`${where}: "emoji" sem "emoji"`);
     if (!Array.isArray(ex.options) || ex.options.length < 2) fail(`${where}: poucas opções`);

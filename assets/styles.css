@@ -320,6 +320,23 @@ a { touch-action: manipulation; }
 .autobar > i { display: block; height: 5px; border-radius: 3px; width: 100%; transform-origin: left; animation: autoShrink linear forwards; }
 @keyframes autoShrink { from { transform: scaleX(1); } to { transform: scaleX(0); } }
 
+/* diálogo de evangelização (chat) */
+.dlg-thread { display: flex; flex-direction: column; gap: 10px; margin: 4px 0 18px; }
+.dlg-row { display: flex; align-items: flex-end; gap: 8px; max-width: 100%; }
+.dlg-row.npc { justify-content: flex-start; }
+.dlg-row.me { justify-content: flex-end; }
+.dlg-av { flex: 0 0 30px; width: 30px; height: 30px; border-radius: 50%; background: #EDF0F5;
+  display: flex; align-items: center; justify-content: center; }
+.dlg-bubble { position: relative; max-width: 78%; padding: 11px 14px; border-radius: 16px;
+  font-size: 15px; line-height: 1.35; white-space: pre-line; }
+.dlg-row.npc .dlg-bubble { background: #EDF0F5; color: #1C2330; border-bottom-left-radius: 4px; }
+.dlg-row.me .dlg-bubble { background: #DDE9FF; color: #173A7A; border-bottom-right-radius: 4px; }
+.dlg-row.me .dlg-bubble.wrong { background: #FCE3D6; color: #8A3B12; }
+.dlg-pt { display: block; margin-top: 3px; font-size: 12px; color: #8A93A6; font-style: italic; }
+.dlg-audio { margin-left: 8px; vertical-align: middle; border: none; background: transparent;
+  cursor: pointer; padding: 2px; opacity: 0.7; }
+.dlg-audio:active { opacity: 1; transform: scale(0.9); }
+
 /* word bank / dictation */
 .answer-line {
   min-height: 62px; border-bottom: 2px solid var(--c-line-2); padding: 6px 0 14px;
