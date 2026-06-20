@@ -458,3 +458,51 @@ window.CAMINO_DATA = {
     { id: 'a-fluent', name: 'Fluente',          icon: 'trophy', c: '#C9A227', bg: '#FBF3D6', kind: 'level',   n: 'fluente' },
   ],
 };
+
+/* ------------------------------------------------------------
+   Material de "Aprenda" por lição (intro de vocabulário).
+   Centralizado aqui para que quase toda lição abra com a tela
+   de estudo. Lições que já definem `teach` inline têm prioridade.
+   ------------------------------------------------------------ */
+var CAMINO_TEACH = {
+  // Iniciante
+  'ini-m1-l2': [{ es: 'sí', pt: 'sim' }, { es: 'no', pt: 'não' }, { es: 'Perdón', pt: 'Desculpe / com licença' }, { es: 'Adiós', pt: 'Tchau' }],
+  'ini-m2-l1': [{ es: 'el baño', pt: 'o banheiro' }, { es: 'el pasaporte', pt: 'o passaporte' }, { es: '¿Cuánto cuesta?', pt: 'Quanto custa?' }, { es: 'Estoy perdido', pt: 'Estou perdido' }],
+  'ini-m2-l2': [{ es: 'agua', pt: 'água' }, { es: 'Tengo hambre', pt: 'Estou com fome' }, { es: '¿Me puede ayudar?', pt: 'Pode me ajudar?' }, { es: 'Necesito…', pt: 'Preciso de…' }],
+  // Básico
+  'bas-m1-l2': [{ es: '¿De dónde eres?', pt: 'De onde você é?' }, { es: '¿Cómo estás?', pt: 'Como vai?' }, { es: 'Bien, gracias', pt: 'Bem, obrigado' }, { es: '¿Hablas español?', pt: 'Você fala espanhol?' }],
+  'bas-m2-l1': [{ es: 'a la derecha', pt: 'à direita' }, { es: 'a la izquierda', pt: 'à esquerda' }, { es: 'cerca / lejos', pt: 'perto / longe' }, { es: '¿Dónde está…?', pt: 'Onde fica…?' }],
+  'bas-m2-l2': [{ es: '¿Cuánto cuesta?', pt: 'Quanto custa?' }, { es: 'caro / barato', pt: 'caro / barato' }, { es: 'La cuenta, por favor', pt: 'A conta, por favor' }],
+  // Intermediário 1
+  'int1-m1-l2': [{ es: '¿Puedo orar por ti?', pt: 'Posso orar por você?' }, { es: '¿Quieres conocer a Jesús?', pt: 'Quer conhecer Jesus?' }, { es: 'la Biblia', pt: 'a Bíblia' }],
+  'int1-m2-l1': [{ es: 'Soy misionero', pt: 'Sou missionário' }, { es: 'Estoy de viaje', pt: 'Estou de viagem' }, { es: 'Tengo veinte años', pt: 'Tenho vinte anos' }],
+  'int1-m2-l2': [{ es: 'Estoy feliz', pt: 'Estou feliz' }, { es: 'Estoy cansado', pt: 'Estou cansado' }, { es: 'agradecido', pt: 'agradecido' }, { es: 'Gracias a Dios', pt: 'Graças a Deus' }],
+  // Intermediário 2
+  'int2-m1-l1': [{ es: 'Dios cambió mi vida', pt: 'Deus mudou minha vida' }, { es: 'antes / ahora', pt: 'antes / agora' }, { es: 'Encontré la paz', pt: 'Encontrei a paz' }],
+  'int2-m1-l2': [{ es: 'Dios es amor', pt: 'Deus é amor' }, { es: 'la palabra de Dios', pt: 'a palavra de Deus' }, { es: 'el Señor es mi pastor', pt: 'o Senhor é meu pastor' }],
+  'int2-m2-l1': [{ es: 'mañana / hoy', pt: 'amanhã / hoje' }, { es: '¿Quieres venir?', pt: 'Quer vir?' }, { es: 'Nos vemos', pt: 'A gente se vê' }],
+  'int2-m2-l2': [{ es: '¿Quieres ir conmigo?', pt: 'Quer ir comigo?' }, { es: 'Vamos a comer juntos', pt: 'Vamos comer juntos' }, { es: 'Te invito', pt: 'Eu te convido' }],
+  // Avançado 1
+  'av1-m1-l1': [{ es: 'Creo que…', pt: 'Acho que…' }, { es: 'Estoy de acuerdo', pt: 'Concordo' }, { es: 'No estoy seguro', pt: 'Não tenho certeza' }, { es: 'Me parece bien', pt: 'Me parece bom' }],
+  'av1-m1-l2': [{ es: '¿Por qué sufrimos?', pt: 'Por que sofremos?' }, { es: 'la esperanza', pt: 'a esperança' }, { es: 'el perdón', pt: 'o perdão' }],
+  'av1-m2-l1': [{ es: '¿Cómo sé que Dios existe?', pt: 'Como sei que Deus existe?' }, { es: 'la duda', pt: 'a dúvida' }, { es: 'Dios tiene un plan', pt: 'Deus tem um plano' }],
+  'av1-m2-l2': [{ es: 'No estás solo', pt: 'Você não está sozinho' }, { es: 'Jesús da paz', pt: 'Jesus dá paz' }, { es: 'Puedes confiar en Dios', pt: 'Pode confiar em Deus' }],
+  // Avançado 2
+  'av2-m1-l1': [{ es: 'Vamos a orar juntos', pt: 'Vamos orar juntos' }, { es: 'leer la Biblia', pt: 'ler a Bíblia' }, { es: 'la iglesia', pt: 'a igreja' }, { es: 'crecer en la fe', pt: 'crescer na fé' }],
+  'av2-m1-l2': [{ es: 'orar por los demás', pt: 'orar pelos outros' }, { es: 'servir con amor', pt: 'servir com amor' }, { es: '¿Cómo puedo ayudarte?', pt: 'Como posso te ajudar?' }],
+  'av2-m2-l1': [{ es: 'la comida típica', pt: 'a comida típica' }, { es: 'las costumbres', pt: 'os costumes' }, { es: 'Ten cuidado', pt: 'Tenha cuidado' }],
+  'av2-m2-l2': [{ es: 'respetar las costumbres', pt: 'respeitar os costumes' }, { es: 'Gracias por tu hospitalidad', pt: 'Obrigado pela hospitalidade' }, { es: 'bienvenido', pt: 'bem-vindo' }],
+  // Fluente
+  'flu-m1-l1': [{ es: 'vale', pt: 'ok / combinado' }, { es: 'No pasa nada', pt: 'Sem problema' }, { es: '¡Qué chévere!', pt: 'Que legal!' }, { es: 'en serio', pt: 'sério' }],
+  'flu-m1-l2': [{ es: '¡Qué guay!', pt: 'Que legal! (Espanha)' }, { es: 'Nos vemos al rato', pt: 'A gente se vê já já' }, { es: 'Vale, perfecto', pt: 'Ok, perfeito' }],
+  'flu-m2-l1': [{ es: 'Que Dios te bendiga', pt: 'Que Deus te abençoe' }, { es: 'Sigue adelante', pt: 'Siga em frente' }, { es: 'paz y esperanza', pt: 'paz e esperança' }],
+  'flu-m2-l2': [{ es: 'Fue un placer conocerte', pt: 'Foi um prazer te conhecer' }, { es: 'Cuídate mucho', pt: 'Cuide-se' }, { es: 'Hasta pronto', pt: 'Até logo' }, { es: 'Buen viaje', pt: 'Boa viagem' }],
+};
+// Aplica o material às lições que ainda não definem `teach` inline.
+window.CAMINO_DATA.levels.forEach(function (lv) {
+  lv.modules.forEach(function (mod) {
+    mod.lessons.forEach(function (l) {
+      if (!l.teach && CAMINO_TEACH[l.id]) l.teach = CAMINO_TEACH[l.id];
+    });
+  });
+});
