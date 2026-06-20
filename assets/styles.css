@@ -338,6 +338,14 @@ a { touch-action: manipulation; }
 .ti-es { font-size: 17px; font-weight: 700; color: #5C19B1; }
 .ti-pt { font-size: 13.5px; font-weight: 600; color: var(--c-ink-2); margin-top: 1px; }
 
+/* pic (toque na imagem / emoji) */
+.pic-word { display: flex; align-items: center; gap: 14px; justify-content: center; margin-bottom: 18px; }
+.pic-word .es { font-size: 24px; font-weight: 800; color: #5C19B1; }
+.pic-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pic-opt { font-size: 52px; line-height: 1; background: #fff; border: 2px solid #CFD6E5; border-bottom-width: 5px;
+  border-radius: 18px; padding: 22px 0; cursor: pointer; transition: transform 0.08s, border-color 0.12s; }
+.pic-opt:active:not(:disabled) { transform: translateY(3px); border-bottom-width: 2px; }
+
 /* gramática (carta de regra) */
 .grammar { }
 .gr-title { font-size: 20px; font-weight: 800; color: var(--c-ink); margin-bottom: 8px; }
