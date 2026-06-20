@@ -129,6 +129,8 @@
   S.obStep = 0;       // passo do onboarding
   S.obGoal = S.dailyGoalXp; // seleção temporária de meta no onboarding
   S.homeLevel = null; // nível em foco na home (null = nível atual)
+  S.guideTab = 'verses'; // aba "Bolso": 'verses' | 'pocket'
+  S.versesShown = {};    // versículos com a tradução revelada (id → true)
   S.levelUpIdx = 0;   // nível recém-concluído (tela de level-up)
   S.cur = null;       // índice global da lição em curso (-1 = desafio diário)
   S.daily = false;    // estamos no desafio diário?
@@ -483,6 +485,8 @@
     return '<div class="bottomnav">' +
       '<button class="navbtn ' + (active === 'home' ? 'active' : '') + '" data-act="goHome">' +
       svg(IC.map, 26, active === 'home' ? '#E73B4C' : '#9CA5B8') + '<span>Trilha</span></button>' +
+      '<button class="navbtn ' + (active === 'guide' ? 'active' : '') + '" data-act="goGuide">' +
+      svg(IC.book, 26, active === 'guide' ? '#E73B4C' : '#9CA5B8') + '<span>Bolso</span></button>' +
       '<button class="navbtn ' + (active === 'profile' ? 'active' : '') + '" data-act="goProfile">' +
       svg(IC.account, 26, active === 'profile' ? '#E73B4C' : '#9CA5B8') + '<span>Perfil</span></button>' +
       '</div>';
@@ -947,6 +951,56 @@
     return html;
   }
 
+  // Aba "Bolso": versículos para memorizar + frases de consulta rápida.
+  function viewGuide() {
+    var tab = S.guideTab === 'pocket' ? 'pocket' : 'verses';
+    var html = topbar();
+    html += '<div class="scroll" style="padding:16px 18px 28px;">';
+
+    html += '<div class="greet"><div class="mascot">' + mascot(56, 'happy') + '</div>' +
+      '<div style="flex:1;"><div class="t1">Guia de bolso</div>' +
+      '<div class="t2">Versículos e frases para levar a campo.</div></div></div>';
+
+    // segmented control
+    html += '<div class="seg">' +
+      '<button class="seg-btn ' + (tab === 'verses' ? 'on' : '') + '" data-act="guideTab" data-tab="verses">Versículos</button>' +
+      '<button class="seg-btn ' + (tab === 'pocket' ? 'on' : '') + '" data-act="guideTab" data-tab="pocket">Frases de bolso</button>' +
+      '</div>';
+
+    if (tab === 'verses') {
+      html += '<div class="guide-hint">Leia em voz alta e toque para ver a tradução. Tente memorizar! 🕊️</div>';
+      (DATA.verses || []).forEach(function (v, i) {
+        var shown = !!S.versesShown[i];
+        html += '<div class="verse-card" data-act="verseToggle" data-i="' + i + '">' +
+          '<div class="vc-top"><span class="vc-ref">' + esc(v.ref) + '</span>' +
+          '<button class="vc-audio" data-act="speakText" data-text="' + esc(v.es) + '" aria-label="Ouvir">' + svg(SPEAKER_PATH, 18, '#9D55FF') + '</button></div>' +
+          '<div class="vc-es">' + esc(v.es) + '</div>' +
+          (shown
+            ? '<div class="vc-pt">' + esc(v.pt) + '</div>'
+            : '<div class="vc-pt tap">Toque para ver a tradução</div>') +
+          '</div>';
+      });
+    } else {
+      html += '<div class="guide-hint">Toque em qualquer frase para ouvir a pronúncia.</div>';
+      (DATA.pocket || []).forEach(function (g) {
+        html += '<div class="pocket-group">' +
+          '<div class="pg-head" style="background:' + (g.bg || '#F0F3FA') + ';color:' + (g.color || '#363D4D') + ';">' +
+          svg(IC[g.icon] || IC.star, 18, g.color || '#363D4D') + '<span>' + esc(g.title) + '</span></div>';
+        (g.items || []).forEach(function (it) {
+          html += '<button class="pocket-item" data-act="speakText" data-text="' + esc(it.es) + '">' +
+            '<div class="pi-tx"><div class="pi-es">' + esc(it.es) + '</div>' +
+            '<div class="pi-pt">' + esc(it.pt) + '</div></div>' +
+            svg(SPEAKER_PATH, 18, '#9D55FF') + '</button>';
+        });
+        html += '</div>';
+      });
+    }
+
+    html += '</div>'; // scroll
+    html += bottomnav('guide');
+    return html;
+  }
+
   // ===========================================================
   //  Render
   // ===========================================================
@@ -975,6 +1029,7 @@
       case 'levels':   body = viewLevels(); break;
       case 'lives':    body = viewLives(); break;
       case 'profile':  body = viewProfile(); break;
+      case 'guide':    body = viewGuide(); break;
       default:         body = viewHome();
     }
     root.innerHTML = '<div class="screen" data-screen="' + S.screen + '">' + body + '</div>' +
@@ -1531,7 +1586,16 @@
       case 'start': startLesson(parseInt(t.getAttribute('data-gi'), 10)); break;
       case 'goHome': set({ screen: 'home', homeLevel: null }); break;
       case 'goProfile': set({ screen: 'profile' }); break;
+      case 'goGuide': set({ screen: 'guide' }); break;
       case 'goLevels': set({ screen: 'levels' }); break;
+      case 'guideTab': set({ guideTab: t.getAttribute('data-tab') }); break;
+      case 'verseToggle': {
+        var vi = t.getAttribute('data-i');
+        var shown = Object.assign({}, S.versesShown);
+        if (shown[vi]) delete shown[vi]; else shown[vi] = true;
+        set({ versesShown: shown });
+        break;
+      }
       case 'openLevel': set({ screen: 'home', homeLevel: parseInt(t.getAttribute('data-li'), 10) }); break;
       case 'levelPrev': {
         var curL = (S.homeLevel != null ? S.homeLevel : currentLevelIdx());

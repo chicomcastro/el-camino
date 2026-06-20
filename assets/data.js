@@ -1194,6 +1194,58 @@ window.CAMINO_DATA = {
     { id: 'a-disc',   name: 'Discipulador',     icon: 'cross',  c: '#E73B4C', bg: '#FFE6E9', kind: 'level',   n: 'avan2' },
     { id: 'a-fluent', name: 'Fluente',          icon: 'trophy', c: '#C9A227', bg: '#FBF3D6', kind: 'level',   n: 'fluente' },
   ],
+
+  // Versículos-chave para memorizar (espanhol + tradução + referência).
+  // Usados na aba "Bolso" como flashcards de memorização.
+  verses: [
+    { ref: 'Juan 3:16', es: 'Porque de tal manera amó Dios al mundo, que dio a su Hijo único.', pt: 'Porque Deus amou o mundo de tal maneira, que deu o seu Filho único.' },
+    { ref: 'Salmo 23:1', es: 'El Señor es mi pastor; nada me faltará.', pt: 'O Senhor é o meu pastor; nada me faltará.' },
+    { ref: 'Filipenses 4:13', es: 'Todo lo puedo en Cristo que me fortalece.', pt: 'Tudo posso naquele que me fortalece.' },
+    { ref: 'Juan 14:6', es: 'Yo soy el camino, la verdad y la vida.', pt: 'Eu sou o caminho, a verdade e a vida.' },
+    { ref: 'Romanos 8:28', es: 'A los que aman a Dios, todo les ayuda a bien.', pt: 'Todas as coisas cooperam para o bem daqueles que amam a Deus.' },
+    { ref: 'Mateo 11:28', es: 'Vengan a mí todos los que están cansados, y yo los haré descansar.', pt: 'Vinde a mim todos os que estais cansados, e eu vos aliviarei.' },
+    { ref: 'Proverbios 3:5', es: 'Confía en el Señor con todo tu corazón.', pt: 'Confia no Senhor de todo o teu coração.' },
+    { ref: 'Josué 1:9', es: 'Esfuérzate y sé valiente; el Señor tu Dios estará contigo.', pt: 'Sê forte e corajoso; o Senhor teu Deus estará contigo.' },
+    { ref: 'Salmo 46:1', es: 'Dios es nuestro amparo y nuestra fortaleza.', pt: 'Deus é o nosso refúgio e a nossa fortaleza.' },
+    { ref: '1 Juan 4:8', es: 'Dios es amor.', pt: 'Deus é amor.' },
+  ],
+
+  // Frases de bolso: guia de consulta rápida por categoria (aba "Bolso").
+  pocket: [
+    { title: 'Saudações e bênçãos', icon: 'star', color: '#E8A13C', bg: '#FFF4E5', items: [
+      { es: 'Que Dios te bendiga', pt: 'Que Deus te abençoe' },
+      { es: 'La paz esté contigo', pt: 'A paz esteja com você' },
+      { es: 'Que tengas un buen día', pt: 'Tenha um bom dia' },
+      { es: 'Estoy orando por ti', pt: 'Estou orando por você' },
+    ] },
+    { title: 'Meu testemunho', icon: 'heart', color: '#E73B4C', bg: '#FFE6E9', items: [
+      { es: 'Antes estaba perdido, ahora tengo paz', pt: 'Antes eu estava perdido, agora tenho paz' },
+      { es: 'Dios cambió mi vida', pt: 'Deus mudou a minha vida' },
+      { es: 'Encontré un propósito', pt: 'Encontrei um propósito' },
+      { es: '¿Puedo contarte mi historia?', pt: 'Posso te contar a minha história?' },
+    ] },
+    { title: 'Convite e fé', icon: 'cross', color: '#9D55FF', bg: '#F5F0FF', items: [
+      { es: 'Dios te ama y tiene un plan para ti', pt: 'Deus te ama e tem um plano para você' },
+      { es: '¿Puedo orar por ti?', pt: 'Posso orar por você?' },
+      { es: '¿Te gustaría venir a una reunión?', pt: 'Você gostaria de vir a uma reunião?' },
+      { es: '¿Quieres conocer a Jesús?', pt: 'Quer conhecer Jesus?' },
+    ] },
+    { title: 'Respostas a objeções', icon: 'chat', color: '#3C76E8', bg: '#E5EEFF', items: [
+      { es: 'Respeto tu opinión', pt: 'Respeito a sua opinião' },
+      { es: 'No vengo a juzgar', pt: 'Não venho julgar' },
+      { es: 'Yo también tenía dudas', pt: 'Eu também tinha dúvidas' },
+      { es: 'Solo será un minuto', pt: 'Será só um minuto' },
+    ] },
+    { title: 'Emergências de viagem', icon: 'plane', color: '#1AC136', bg: '#E7FEEA', items: [
+      { es: '¿Me puede ayudar, por favor?', pt: 'Pode me ajudar, por favor?' },
+      { es: 'Estoy perdido', pt: 'Estou perdido' },
+      { es: 'No me siento bien', pt: 'Não estou me sentindo bem' },
+      { es: 'Necesito un médico', pt: 'Preciso de um médico' },
+      { es: '¿Dónde está el hospital?', pt: 'Onde fica o hospital?' },
+      { es: 'Perdí mi pasaporte', pt: 'Perdi o meu passaporte' },
+      { es: 'Llame a la policía, por favor', pt: 'Chame a polícia, por favor' },
+    ] },
+  ],
 };
 
 /* ------------------------------------------------------------
