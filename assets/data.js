@@ -1030,15 +1030,19 @@ window.CAMINO_DATA = {
               { es: 'Para Dios tú vales mucho', pt: 'Para Deus você vale muito' },
             ],
             exercises: [
+              // Ramificado: as duas aberturas e os dois motivos de ajudar são igualmente
+              // acolhedores (accept); a pessoa reage e os caminhos se reencontram na bênção.
               { type: 'dialog', prompt: 'Acolha quem pede comida, com dignidade', persona: 'Pessoa com fome',
                 turns: [
                   { npc: 'Disculpe... ¿tiene algo de comida?', npcPt: 'Com licença... você tem alguma comida?',
-                    options: ['Claro. ¿Tienes hambre? Te invito a comer.', 'No tengo nada, adiós.', 'No es mi problema.'], correct: 0 },
+                    options: ['Claro. ¿Tienes hambre? Te invito a comer.', 'Claro. Ven, te compro algo de comer.', 'No es mi problema.'], correct: 0, accept: [0, 1] },
                   { npc: 'Gracias... hace días que no como bien.', npcPt: 'Obrigado... faz dias que não como bem.',
                     options: ['Lo siento mucho. Ven, vamos juntos.', 'Eso no es verdad.', 'Tengo prisa.'], correct: 0 },
                   { npc: '¿Por qué me ayuda? Nadie lo hace.', npcPt: 'Por que você me ajuda? Ninguém faz isso.',
-                    options: ['Porque para Dios tú vales mucho.', 'No lo sé.', 'Solo por hoy.'], correct: 0 },
-                  { npc: 'Nunca había pensado en eso.', npcPt: 'Nunca tinha pensado nisso.',
+                    options: ['Porque para Dios tú vales mucho.', 'Porque todos merecemos cariño y respeto.', 'Solo por hoy.'], correct: 0, accept: [0, 1], branches: { 0: 3, 1: 4 } },
+                  { npc: 'Nunca nadie me dijo que valgo.', npcPt: 'Nunca ninguém me disse que eu valho.',
+                    options: ['No estás solo. Dios te ama.', 'Da igual.', 'Tengo que irme.'], correct: 0, branches: { 0: 5 } },
+                  { npc: 'Hace tiempo que no siento cariño.', npcPt: 'Faz tempo que não sinto carinho.',
                     options: ['No estás solo. Dios te ama.', 'Da igual.', 'Tengo que irme.'], correct: 0 },
                   { npc: 'Gracias de verdad. Me dio esperanza.', npcPt: 'Obrigado de verdade. Você me deu esperança.',
                     options: ['Que Dios te bendiga y te cuide.', 'No fue nada importante.', 'Adiós para siempre.'], correct: 0 },
@@ -1055,15 +1059,19 @@ window.CAMINO_DATA = {
               { es: 'Usted importa', pt: 'A senhora importa / você importa' },
             ],
             exercises: [
+              // Ramificado: você reassegura o valor dela ("usted importa" ou "hay quien
+              // se preocupa"); ambos os caminhos respeitosos se reencontram na bênção.
               { type: 'dialog', prompt: 'Aproxime-se de alguém vulnerável, sem julgar (use "usted")', persona: 'Mulher na rua',
                 turns: [
                   { npc: '¿Qué quiere? Déjeme en paz.', npcPt: 'O que você quer? Me deixe em paz.',
-                    options: ['Disculpe. Solo quiero saber si está bien.', 'Tiene que escucharme.', 'Usted está mal.'], correct: 0 },
+                    options: ['Disculpe. Solo quiero saber si está bien.', 'Disculpe. No quiero molestar, solo saludar.', 'Usted está mal.'], correct: 0, accept: [0, 1] },
                   { npc: 'Estoy cansada de que la gente me juzgue.', npcPt: 'Estou cansada de que as pessoas me julguem.',
                     options: ['No vengo a juzgar. Vengo con respeto.', 'Todos la juzgan por algo.', 'No me importa su vida.'], correct: 0 },
                   { npc: '¿Y entonces qué quiere?', npcPt: 'E então o que você quer?',
-                    options: ['Que sepa que usted importa y no está sola.', 'Que cambie ya.', 'Nada en especial.'], correct: 0 },
+                    options: ['Que sepa que usted importa y no está sola.', 'Que sepa que hay personas que se preocupan.', 'Que cambie ya.'], correct: 0, accept: [0, 1], branches: { 0: 3, 1: 4 } },
                   { npc: 'Hace mucho que nadie me dice algo así.', npcPt: 'Faz muito tempo que ninguém me diz algo assim.',
+                    options: ['Hay ayuda disponible, y Dios la ama.', 'Eso es problema suyo.', 'Debería tener cuidado.'], correct: 0, branches: { 0: 5 } },
+                  { npc: 'No pensé que alguien se preocupara.', npcPt: 'Não pensei que alguém se importasse.',
                     options: ['Hay ayuda disponible, y Dios la ama.', 'Eso es problema suyo.', 'Debería tener cuidado.'], correct: 0 },
                   { npc: 'Gracias por tratarme con respeto.', npcPt: 'Obrigada por me tratar com respeito.',
                     options: ['Siempre. Que Dios la bendiga y la guarde.', 'No es para tanto.', 'Adiós.'], correct: 0 },
@@ -1210,15 +1218,19 @@ window.CAMINO_DATA = {
               { es: 'puedes pedir ayuda', pt: 'você pode pedir ajuda' },
             ],
             exercises: [
+              // Ramificado: você oferece esperança de dois jeitos compassivos (uma saída
+              // com Deus / passo a passo sem estar só); reconverge no acompanhamento.
               { type: 'dialog', prompt: 'Fale com compaixão, sem julgar', persona: 'Pessoa em luta',
                 turns: [
                   { npc: 'No me mires así. Sé que estoy mal.', npcPt: 'Não me olhe assim. Eu sei que estou mal.',
-                    options: ['No vine a juzgarte. Vine a escucharte.', 'Tienes que parar ya.', 'Es tu culpa.'], correct: 0 },
+                    options: ['No vine a juzgarte. Vine a escucharte.', 'No vine a juzgarte. Vine a acompañarte.', 'Es tu culpa.'], correct: 0, accept: [0, 1] },
                   { npc: 'Lo he intentado, pero siempre recaigo.', npcPt: 'Eu já tentei, mas sempre recaio.',
                     options: ['Caer no es el final. Siempre puedes empezar de nuevo.', 'Entonces no hay solución.', 'No te esfuerzas.'], correct: 0 },
                   { npc: '¿Tú crees que puedo cambiar?', npcPt: 'Você acha que eu posso mudar?',
-                    options: ['Sí. Con ayuda y con Dios, hay una salida.', 'No lo sé.', 'Es muy difícil.'], correct: 0 },
-                  { npc: 'No sé por dónde empezar.', npcPt: 'Não sei por onde começar.',
+                    options: ['Sí. Con ayuda y con Dios, hay una salida.', 'Sí. Paso a paso, y no estás solo.', 'Es muy difícil.'], correct: 0, accept: [0, 1], branches: { 0: 3, 1: 4 } },
+                  { npc: 'Una salida... quiero creer eso.', npcPt: 'Uma saída... quero acreditar nisso.',
+                    options: ['Puedes pedir ayuda, y yo te acompaño.', 'Búscalo solo.', 'No es mi asunto.'], correct: 0, branches: { 0: 5 } },
+                  { npc: 'Paso a paso... quizás pueda.', npcPt: 'Passo a passo... talvez eu consiga.',
                     options: ['Puedes pedir ayuda, y yo te acompaño.', 'Búscalo solo.', 'No es mi asunto.'], correct: 0 },
                   { npc: 'Gracias por no rendirte conmigo.', npcPt: 'Obrigado por não desistir de mim.',
                     options: ['Nunca. Dios tampoco se rinde contigo.', 'Veremos si es verdad.', 'Adiós.'], correct: 0 },
@@ -1235,15 +1247,19 @@ window.CAMINO_DATA = {
               { es: 'Hay personas que pueden ayudarla', pt: 'Há pessoas que podem ajudá-la' },
             ],
             exercises: [
+              // Ramificado: você reafirma o valor dela com fundamentos diferentes (para
+              // Deus / ela merece amor); ambos os caminhos se reencontram na esperança.
               { type: 'dialog', prompt: 'Devolva dignidade e esperança, sem condenar (use "usted")', persona: 'Mulher em risco',
                 turns: [
                   { npc: '¿Busca algo? Aquí no doy nada gratis.', npcPt: 'Procura algo? Aqui eu não dou nada de graça.',
-                    options: ['No busco nada. Solo quería saludarla con respeto.', 'Vengo a decirle lo que hace mal.', 'Debería avergonzarse.'], correct: 0 },
+                    options: ['No busco nada. Solo quería saludarla con respeto.', 'No busco nada. Solo quería desearle un buen día.', 'Debería avergonzarse.'], correct: 0, accept: [0, 1] },
                   { npc: 'La gente solo me ve para usarme o para juzgarme.', npcPt: 'As pessoas só me veem para me usar ou me julgar.',
                     options: ['Yo no la juzgo. Usted es una persona valiosa.', 'Bueno, algo habrá hecho.', 'No es mi problema.'], correct: 0 },
                   { npc: '¿Valiosa? Hace mucho que no me siento así.', npcPt: 'Valiosa? Faz muito tempo que não me sinto assim.',
-                    options: ['Para Dios usted vale muchísimo, siempre.', 'Tal vez algún día.', 'No sé qué decir.'], correct: 0 },
-                  { npc: 'Ojalá pudiera salir de esta vida.', npcPt: 'Quem dera eu pudesse sair desta vida.',
+                    options: ['Para Dios usted vale muchísimo, siempre.', 'Usted merece amor y respeto, siempre.', 'Tal vez algún día.'], correct: 0, accept: [0, 1], branches: { 0: 3, 1: 4 } },
+                  { npc: 'Quisiera creer que es verdad.', npcPt: 'Queria acreditar que é verdade.',
+                    options: ['Hay personas que pueden ayudarla. No está sola.', 'Eso es imposible.', 'Es decisión suya.'], correct: 0, branches: { 0: 5 } },
+                  { npc: 'Nadie me había dicho eso.', npcPt: 'Ninguém tinha me dito isso.',
                     options: ['Hay personas que pueden ayudarla. No está sola.', 'Eso es imposible.', 'Es decisión suya.'], correct: 0 },
                   { npc: 'Gracias por verme como un ser humano.', npcPt: 'Obrigada por me ver como um ser humano.',
                     options: ['Siempre. Que Dios la bendiga y le dé un nuevo camino.', 'No prometo nada.', 'Adiós.'], correct: 0 },
