@@ -691,24 +691,24 @@ window.CAMINO_DATA.levels.forEach(function (lv) {
    categoria. Cada item: [emoji, palavra em espanhol].
    ------------------------------------------------------------ */
 var EMOJI_GROUPS = [
-  { id: 'voc-comida', title: 'Comida e bebida', icon: 'cart', level: 'iniciante', items: [
+  { id: 'voc-comida', title: 'Comida e bebida', icon: 'cart', level: 'iniciante', theme: 'viagem', items: [
     ['💧', 'agua'], ['🍞', 'pan'], ['☕', 'café'], ['🥛', 'leche'], ['🍎', 'manzana'],
-    ['🍌', 'plátano'], ['🧀', 'queso'], ['🥚', 'huevo'], ['🍖', 'carne'], ['🐟', 'pescado'] ] },
-  { id: 'voc-animais', title: 'Animais', icon: 'star', level: 'iniciante', items: [
-    ['🐶', 'perro'], ['🐱', 'gato'], ['🐴', 'caballo'], ['🐮', 'vaca'], ['🐦', 'pájaro'],
-    ['🐑', 'oveja'], ['🦁', 'león'], ['🐘', 'elefante'], ['🐰', 'conejo'], ['🐝', 'abeja'] ] },
-  { id: 'voc-transporte', title: 'Transporte', icon: 'plane', level: 'basico', items: [
+    ['🧀', 'queso'], ['🍖', 'carne'], ['🐟', 'pescado'] ] },
+  { id: 'voc-fe', title: 'Fé', icon: 'cross', level: 'iniciante', theme: 'evangelizacao', items: [
+    ['⛪', 'iglesia'], ['📖', 'Biblia'], ['✝️', 'cruz'], ['🙏', 'orar'],
+    ['🕊️', 'paloma'], ['❤️', 'amor'], ['🕯️', 'vela'], ['👼', 'ángel'] ] },
+  { id: 'voc-viagem', title: 'Viagem essencial', icon: 'plane', level: 'basico', theme: 'viagem', items: [
+    ['🛂', 'pasaporte'], ['🧳', 'maleta'], ['🎒', 'mochila'], ['🗺️', 'mapa'],
+    ['💰', 'dinero'], ['🔑', 'llave'], ['📱', 'teléfono'], ['💊', 'medicina'] ] },
+  { id: 'voc-transporte', title: 'Transporte', icon: 'plane', level: 'basico', theme: 'viagem', items: [
     ['🚌', 'autobús'], ['🚗', 'coche'], ['✈️', 'avión'], ['🚆', 'tren'], ['🚕', 'taxi'],
     ['⛵', 'barco'], ['🚲', 'bicicleta'], ['🏍️', 'moto'] ] },
-  { id: 'voc-lugares', title: 'Lugares', icon: 'map', level: 'basico', items: [
-    ['🏨', 'hotel'], ['🏠', 'casa'], ['⛪', 'iglesia'], ['🏥', 'hospital'], ['🏫', 'escuela'],
-    ['🏪', 'tienda'], ['🏦', 'banco'], ['🚪', 'puerta'] ] },
-  { id: 'voc-natureza', title: 'Natureza', icon: 'star', level: 'basico', items: [
+  { id: 'voc-lugares', title: 'Lugares', icon: 'map', level: 'basico', theme: 'viagem', items: [
+    ['🏨', 'hotel'], ['🏠', 'casa'], ['🏥', 'hospital'], ['🏫', 'escuela'],
+    ['🏪', 'tienda'], ['🏦', 'banco'], ['🍽️', 'restaurante'], ['🚪', 'puerta'] ] },
+  { id: 'voc-natureza', title: 'Natureza', icon: 'star', level: 'basico', theme: 'viagem', items: [
     ['☀️', 'sol'], ['🌧️', 'lluvia'], ['🌙', 'luna'], ['⭐', 'estrella'], ['🌳', 'árbol'],
     ['🌸', 'flor'], ['🌊', 'mar'], ['🔥', 'fuego'] ] },
-  { id: 'voc-objetos', title: 'Objetos', icon: 'book', level: 'basico', items: [
-    ['📖', 'libro'], ['📱', 'teléfono'], ['💰', 'dinero'], ['🔑', 'llave'], ['⌚', 'reloj'],
-    ['🧳', 'maleta'], ['🛏️', 'cama'], ['🪑', 'silla'] ] },
 ];
 
 (function buildEmojiVocab() {
@@ -741,6 +741,6 @@ var EMOJI_GROUPS = [
         exercises: exercises.slice(s, s + 5),
       });
     }
-    lv.modules.push(m(g.id, '🖼️ ' + g.title, 'viagem', g.icon, lessons));
+    lv.modules.push(m(g.id, '🖼️ ' + g.title, g.theme || 'viagem', g.icon, lessons));
   });
 })();
