@@ -30,7 +30,8 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   cloze, pareamento pronome↔verbo). Cartas são instrucionais e não contam na precisão.
 - **Lição** — variedade de exercícios: múltipla escolha com áudio, "monte a frase"
   (banco de palavras), ditado ("toque no que você ouve"), **preencher a lacuna**
-  (cloze), **pareamento** (relacionar colunas ES↔PT) e **fala** (pronúncia: fale a
+  (cloze), **pareamento** (relacionar colunas ES↔PT), **imagem** (toque no emoji
+  certo, para vocabulário concreto) e **fala** (pronúncia: fale a
   frase e o app reconhece a voz), com barra de progresso, feedback de acerto/erro
   e voz em espanhol (Web Speech API). O exercício de fala dá **feedback de
   pronúncia palavra por palavra** (verde/vermelho) com % de precisão e botão de
@@ -82,7 +83,7 @@ icon.svg                ícone (Paloma)
 
 Para adicionar conteúdo, edite `assets/data.js`: a estrutura é
 `levels → modules → lessons → exercises`. Cada lição traz uma lista de
-exercícios (`mcq`, `cloze`, `bank`, `listen`, `match`, `speak`, `grammar`), pode ter um
+exercícios (`mcq`, `cloze`, `bank`, `listen`, `match`, `speak`, `grammar`, `pic`), pode ter um
 `teach` opcional (intro de vocabulário) e cada módulo carrega um tema/cor. As
 conquistas (`achievements`) podem ser por nível concluído (`kind: 'level'`),
 nº de lições (`kind: 'lessons'`) ou ofensiva (`kind: 'streak'`).
