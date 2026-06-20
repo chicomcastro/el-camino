@@ -238,6 +238,11 @@ a { touch-action: manipulation; }
   background: var(--c-green-dk); border: 3px solid #fff;
   display: flex; align-items: center; justify-content: center;
 }
+.node-teach {
+  position: absolute; top: -2px; left: -2px; width: 22px; height: 22px; border-radius: 50%;
+  background: #F5F0FF; border: 2px solid #fff; box-shadow: 0 1px 3px rgba(20,25,40,0.18);
+  display: flex; align-items: center; justify-content: center;
+}
 
 /* ---------- Bottom nav ---------- */
 .bottomnav {
