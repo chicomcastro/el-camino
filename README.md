@@ -56,6 +56,10 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   conversa simples já no Básico e, no Intermediário 1, abordagens adaptadas ao
   interlocutor — um jovem (linguagem próxima) e uma pessoa idosa (tratamento formal
   com "usted"), sempre com respeito.
+- **Compaixão na rua** — nos níveis Avançado 2 e Fluente, diálogos para situações
+  delicadas que o missionário pode encontrar (alguém com fome, pessoas em
+  vulnerabilidade, quem luta contra o vício), conduzidos sempre com **dignidade,
+  sem julgamento e oferecendo esperança e ajuda concreta**.
 - **Kit de campo** — módulo prático para o missionário montar a própria fala:
   estrutura do testemunho pessoal (antes → encontro → agora) e respostas
   respeitosas às objeções mais comuns ("não tenho tempo", "há muitas religiões",
