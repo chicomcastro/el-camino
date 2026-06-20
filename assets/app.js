@@ -140,6 +140,7 @@
   S.matchSelLeft = null;  // pareamento: coluna esquerda selecionada
   S.matchDone = [];       // pareamento: índices já casados
   S.matchOrderR = null;   // pareamento: ordem (embaralhada) da coluna direita
+  S.optOrder = null;      // ordem embaralhada das alternativas (mcq/cloze)
   S.activeExercises = []; // exercícios da sessão em curso
   S.exIndex = 0;
   S.selected = null;
@@ -397,6 +398,10 @@
         if (isDone) {
           html += '<div class="node-check">' + svg('M21,7L9,19L3.5,13.5L4.91,12.09L9,16.17L19.59,5.59L21,7Z', 13, '#fff') + '</div>';
         }
+        // indicador "Aprenda": lição com material de introdução
+        if (!locked && l.teach && l.teach.length) {
+          html += '<div class="node-teach" title="Tem tela Aprenda">' + svg(IC.book, 12, '#5C19B1') + '</div>';
+        }
         html += '</div>';
       });
       html += '</div></div>';
@@ -512,6 +517,26 @@
     return html;
   }
 
+  // Alternativas (MCQ/cloze) renderizadas na ordem embaralhada de S.optOrder.
+  // data-i continua sendo o índice ORIGINAL, então a verificação não muda.
+  function optionsHtml(ex) {
+    var order = (S.optOrder && S.optOrder.length === ex.options.length) ? S.optOrder
+      : ex.options.map(function (_, i) { return i; });
+    var html = '<div class="mcq">';
+    order.forEach(function (i) {
+      var text = ex.options[i];
+      var bg = '#fff', border = '#CFD6E5', color = '#20293B';
+      if (S.checked) {
+        if (i === ex.correct) { bg = '#E7FEEA'; border = '#1AC136'; color = '#0B8C21'; }
+        else if (i === S.selected) { bg = '#FFF4E5'; border = '#E8A13C'; color = '#8E570B'; }
+      } else if (i === S.selected) { bg = '#FFE6E9'; border = '#FF8995'; color = '#C71C2D'; }
+      html += '<button class="opt" ' + (S.checked ? 'disabled' : 'data-act="select" data-i="' + i + '"') +
+        ' style="background:' + bg + ';border-color:' + border + ';"><span style="color:' + color + ';">' +
+        esc(text) + '</span></button>';
+    });
+    return html + '</div>';
+  }
+
   function viewLesson() {
     var ex = curEx();
     var len = curLessonLen();
@@ -584,18 +609,7 @@
       var sentenceHtml = esc(ex.sentence).replace('___', '<span class="cloze-blank' + (S.selected != null ? ' filled' : '') + '">' + esc(filled) + '</span>');
       html += '<div class="cloze-sentence">' + sentenceHtml + '</div>';
       if (ex.pt) html += '<div class="cloze-hint">' + esc(ex.pt) + '</div>';
-      html += '<div class="mcq">';
-      ex.options.forEach(function (text, i) {
-        var bg = '#fff', border = '#CFD6E5', color = '#20293B';
-        if (S.checked) {
-          if (i === ex.correct) { bg = '#E7FEEA'; border = '#1AC136'; color = '#0B8C21'; }
-          else if (i === S.selected) { bg = '#FFF4E5'; border = '#E8A13C'; color = '#8E570B'; }
-        } else if (i === S.selected) { bg = '#FFE6E9'; border = '#FF8995'; color = '#C71C2D'; }
-        html += '<button class="opt" ' + (S.checked ? 'disabled' : 'data-act="select" data-i="' + i + '"') +
-          ' style="background:' + bg + ';border-color:' + border + ';"><span style="color:' + color + ';">' +
-          esc(text) + '</span></button>';
-      });
-      html += '</div>';
+      html += optionsHtml(ex);
     }
 
     // MATCH (pareamento)
@@ -620,18 +634,7 @@
 
     // MCQ
     if (isMcq) {
-      html += '<div class="mcq">';
-      ex.options.forEach(function (text, i) {
-        var bg = '#fff', border = '#CFD6E5', color = '#20293B';
-        if (S.checked) {
-          if (i === ex.correct) { bg = '#E7FEEA'; border = '#1AC136'; color = '#0B8C21'; }
-          else if (i === S.selected) { bg = '#FFF4E5'; border = '#E8A13C'; color = '#8E570B'; }
-        } else if (i === S.selected) { bg = '#FFE6E9'; border = '#FF8995'; color = '#C71C2D'; }
-        html += '<button class="opt" ' + (S.checked ? 'disabled' : 'data-act="select" data-i="' + i + '"') +
-          ' style="background:' + bg + ';border-color:' + border + ';"><span style="color:' + color + ';">' +
-          esc(text) + '</span></button>';
-      });
-      html += '</div>';
+      html += optionsHtml(ex);
     }
 
     // word bank
@@ -1068,7 +1071,11 @@
   //  Ações da lição
   // ===========================================================
   function buildBank(ex) {
-    return ex.words ? ex.words.map(function (w, idx) { return { id: idx, w: w }; }) : [];
+    if (!ex.words) return [];
+    var items = ex.words.map(function (w, idx) { return { id: idx, w: w }; });
+    // embaralha para o banco não vir na ordem da resposta
+    var order = shuffledIdx(items.length);
+    return order.map(function (i) { return items[i]; });
   }
   // Índices [0..n) embaralhados (coluna direita do pareamento).
   function shuffledIdx(n) {
@@ -1078,7 +1085,7 @@
   }
   function initEx(i) {
     var ex = S.activeExercises[i];
-    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: ex.type === 'match' ? shuffledIdx(ex.pairs.length) : null });
+    Object.assign(S, { exIndex: i, selected: null, checked: false, lastOk: false, bank: buildBank(ex), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: ex.type === 'match' ? shuffledIdx(ex.pairs.length) : null, optOrder: (ex.type === 'mcq' || ex.type === 'cloze') ? shuffledIdx(ex.options.length) : null });
     render();
     if (ex.audioEs) speak(ex.audioEs);
     else if (ex.type === 'speak' && ex.es) speak(ex.es);
@@ -1092,7 +1099,7 @@
     var exs = lesson.exercises;
     Object.assign(S, {
       cur: gi, daily: false, review: false, replay: replay, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: (exs[0].type === 'mcq' || exs[0].type === 'cloze') ? shuffledIdx(exs[0].options.length) : null,
     });
     // se a lição tem "aprenda", mostra a introdução antes dos exercícios
     if (lesson.teach && lesson.teach.length) { S.screen = 'teach'; render(); return; }
@@ -1163,7 +1170,7 @@
     if (!exs.length) { toast('Conclua uma lição para liberar o desafio'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -1, daily: true, review: false, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: (exs[0].type === 'mcq' || exs[0].type === 'cloze') ? shuffledIdx(exs[0].options.length) : null,
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if (exs[0].type === 'speak' && exs[0].es) speak(exs[0].es);
@@ -1197,7 +1204,7 @@
     if (!exs.length) { toast('Nada para revisar agora 🙌'); return; }
     Object.assign(S, {
       screen: 'lesson', cur: -2, daily: false, review: true, replay: false, activeExercises: exs, correct: 0, exIndex: 0,
-      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null,
+      selected: null, checked: false, lastOk: false, bank: buildBank(exs[0]), answer: [], speakStatus: 'idle', speakHeard: '', matchSelLeft: null, matchDone: [], matchOrderR: exs[0].type === 'match' ? shuffledIdx(exs[0].pairs.length) : null, optOrder: (exs[0].type === 'mcq' || exs[0].type === 'cloze') ? shuffledIdx(exs[0].options.length) : null,
     });
     render();
     if (exs[0].audioEs) speak(exs[0].audioEs); else if (exs[0].type === 'speak' && exs[0].es) speak(exs[0].es);
