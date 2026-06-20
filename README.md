@@ -73,6 +73,11 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
 - **Conclusão** — celebração com confete, XP ganho, gemas e precisão.
 - **Sem vidas** — tela de recuperação: gaste **gemas** para repor as vidas (ou
   espere a regeneração com o tempo).
+- **Bolso (guia de campo)** — uma aba de consulta rápida com duas seções:
+  **versículos-chave** em espanhol (toque para ouvir e para revelar a tradução,
+  estilo flashcard de memorização) e **frases de bolso** organizadas por categoria
+  (saudações/bênçãos, testemunho, convite, respostas a objeções e emergências de
+  viagem), todas com áudio. Pensada para usar fora das lições, em campo.
 - **Perfil** — estatísticas, progresso por tema e grade de conquistas.
 - **Gamificação** — XP, meta diária (escolhível: 20/50/100/150 XP) com anel de
   progresso e comemoração ao bater a meta, **ofensiva** que avança a cada dia em

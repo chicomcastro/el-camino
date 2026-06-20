@@ -136,6 +136,25 @@ if (!DATA || !ICONS) {
     if ((a.kind === 'streak' || a.kind === 'xp') && (typeof a.n !== 'number' || a.n < 1)) fail(`conquista ${a.id}: n inválido`);
   }
 
+  // Versículos (aba "Bolso")
+  if (DATA.verses !== undefined) {
+    if (!Array.isArray(DATA.verses) || DATA.verses.length === 0) fail('verses vazio');
+    (DATA.verses || []).forEach((v, i) => {
+      if (!v || !v.ref || !v.es || !v.pt) fail(`verses[${i}] precisa de ref, es e pt`);
+    });
+  }
+
+  // Frases de bolso (aba "Bolso")
+  if (DATA.pocket !== undefined) {
+    if (!Array.isArray(DATA.pocket) || DATA.pocket.length === 0) fail('pocket vazio');
+    (DATA.pocket || []).forEach((g, i) => {
+      if (!g || !g.title) fail(`pocket[${i}] sem title`);
+      if (g && g.icon && !ICONS[g.icon]) fail(`pocket[${i}] usa ícone inexistente: "${g.icon}"`);
+      if (!Array.isArray(g.items) || g.items.length === 0) fail(`pocket[${i}] sem items`);
+      (g.items || []).forEach((it, j) => { if (!it || !it.es || !it.pt) fail(`pocket[${i}].items[${j}] precisa de es e pt`); });
+    });
+  }
+
   console.log(`Currículo: ${DATA.levels.length} níveis · ${modules} módulos · ${lessons} lições · ${exercises} exercícios · ${DATA.achievements.length} conquistas`);
 }
 
