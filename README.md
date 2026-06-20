@@ -29,8 +29,10 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   (banco de palavras), ditado ("toque no que você ouve"), **preencher a lacuna**
   (cloze), **pareamento** (relacionar colunas ES↔PT) e **fala** (pronúncia: fale a
   frase e o app reconhece a voz), com barra de progresso, feedback de acerto/erro
-  e voz em espanhol (Web Speech API). O exercício de fala não tira vidas e tem
-  alternativa (auto-avaliação) onde o navegador não reconhece voz.
+  e voz em espanhol (Web Speech API). O exercício de fala dá **feedback de
+  pronúncia palavra por palavra** (verde/vermelho) com % de precisão e botão de
+  tentar de novo; não tira vidas e tem alternativa (auto-avaliação) onde o
+  navegador não reconhece voz.
 - **Desafio do dia** — uma revisão rápida diária que **prioriza os itens vencidos
   da revisão espaçada (SRS)** e completa com exercícios sorteados do que já foi
   aprendido (estáveis durante o dia); dá bônus de XP e gemas.
