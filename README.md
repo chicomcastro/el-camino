@@ -43,6 +43,11 @@ vez para o exterior. Interface em **português**, aprendendo **espanhol**.
   pronúncia palavra por palavra** (verde/vermelho) com % de precisão e botão de
   tentar de novo; não tira vidas e tem alternativa (auto-avaliação) onde o
   navegador não reconhece voz.
+- **Diálogos de evangelização** — exercício `dialog`: uma conversa de rua em
+  vários turnos (um estranho fala em espanhol e o aprendiz escolhe a melhor
+  resposta a cada turno), renderizada como um chat com balões, áudio das falas e
+  feedback turno a turno. Cobre primeiro contato, resposta a objeções com respeito
+  e convite para a reunião — treino direto da missão.
 - **Desafio do dia** — uma revisão rápida diária que **prioriza os itens vencidos
   da revisão espaçada (SRS)** e completa com exercícios sorteados do que já foi
   aprendido (estáveis durante o dia); dá bônus de XP e gemas.
@@ -90,7 +95,7 @@ icon.svg                ícone (Paloma)
 Para adicionar conteúdo, edite `assets/data.js`: a estrutura é
 `levels → modules → lessons → exercises`. Cada lição traz uma lista de
 exercícios (`mcq`, `cloze`, `bank`, `listen`, `match`, `speak`, `grammar`, `pic`,
-`emoji`), pode ter um
+`emoji`, `dialog`), pode ter um
 `teach` opcional (intro de vocabulário) e cada módulo carrega um tema/cor. As
 conquistas (`achievements`) podem ser por nível concluído (`kind: 'level'`),
 nº de lições (`kind: 'lessons'`) ou ofensiva (`kind: 'streak'`).
