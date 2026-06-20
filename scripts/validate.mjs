@@ -21,7 +21,13 @@ const ICONS = globalThis.window.CAMINO_ICONS;
 
 function checkExercise(ex, where) {
   if (!ex.prompt) fail(`${where}: sem prompt`);
-  if (!['mcq', 'bank', 'listen', 'speak', 'cloze', 'match'].includes(ex.type)) fail(`${where}: tipo inválido (${ex.type})`);
+  if (!['mcq', 'bank', 'listen', 'speak', 'cloze', 'match', 'grammar'].includes(ex.type)) fail(`${where}: tipo inválido (${ex.type})`);
+  if (ex.type === 'grammar') {
+    if (!ex.title) fail(`${where}: "grammar" sem "title"`);
+    if (!Array.isArray(ex.rows) || ex.rows.length < 1) fail(`${where}: "grammar" precisa de "rows"`);
+    (ex.rows || []).forEach((r, i) => { if (!Array.isArray(r) || r.length !== 2 || !r[0] || !r[1]) fail(`${where}: row ${i} inválida (espera [a, b])`); });
+    return;
+  }
   if (ex.type === 'speak') {
     if (!ex.es || typeof ex.es !== 'string') fail(`${where}: exercício "speak" sem "es"`);
     return;

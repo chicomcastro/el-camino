@@ -548,6 +548,7 @@
     var isSpeak = ex.type === 'speak';
     var isCloze = ex.type === 'cloze';
     var isMatch = ex.type === 'match';
+    var isGrammar = ex.type === 'grammar';
     var pct = Math.round(((S.exIndex + (S.checked ? 1 : 0)) / len) * 100);
     var hc = heartsColor(S.hearts);
 
@@ -581,6 +582,20 @@
     if (ex.bubblePt) {
       html += '<div class="bubble">' + mascot(58, 'happy') +
         '<div class="box"><div class="txt">' + esc(ex.bubblePt) + '</div><span class="tail"></span></div></div>';
+    }
+
+    // GRAMMAR (carta de regra)
+    if (isGrammar) {
+      html += '<div class="grammar"><div class="gr-title">' + esc(ex.title) + '</div>';
+      if (ex.body) html += '<div class="gr-body">' + esc(ex.body) + '</div>';
+      html += '<div class="gr-table">';
+      ex.rows.forEach(function (r) {
+        html += '<div class="gr-row"><span class="gr-a">' + esc(r[0]) + '</span>' +
+          '<span class="gr-b">' + esc(r[1]) + '</span></div>';
+      });
+      html += '</div>';
+      if (ex.example) html += '<div class="gr-example">' + esc(ex.example) + '</div>';
+      html += '</div>';
     }
 
     // SPEAK (pronúncia / fala)
@@ -686,7 +701,11 @@
     }
     // speak/match antes de concluir não têm botão (a ação é o microfone / parear)
     var showBtn = !((isSpeak || isMatch) && !S.checked);
-    if (showBtn) {
+    if (isGrammar) {
+      // carta de regra: só "ENTENDI" para avançar (instrucional, sem verificar)
+      html += '<div class="verify-wrap">' +
+        '<button class="btn-3d" data-act="next" style="color:#fff;background:#1AC136;box-shadow:0 4px 0 #0B8C21;">ENTENDI</button></div>';
+    } else if (showBtn) {
       var vBg = !enabled ? '#E3E8F1' : (S.checked && !S.lastOk ? '#E8A13C' : '#1AC136');
       var vColor = !enabled ? '#9CA5B8' : '#fff';
       var vShadow = !enabled ? '#C2CADB' : (S.checked && !S.lastOk ? '#C27B17' : '#0B8C21');
@@ -705,7 +724,9 @@
 
   function viewComplete() {
     var len = curLessonLen();
-    var accuracy = Math.round((S.correct / len) * 100);
+    // cartas de gramática são instrucionais; não contam na precisão
+    var gradable = (S.activeExercises || []).filter(function (e) { return e.type !== 'grammar'; }).length || 1;
+    var accuracy = Math.round((S.correct / gradable) * 100);
     var palette = ['#E73B4C', '#3C76E8', '#9D55FF', '#1AC136', '#E8A13C'];
 
     var html = '<div class="complete"><div class="confetti">';
